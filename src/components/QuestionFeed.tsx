@@ -1,79 +1,56 @@
 import QuestionCard from "./QuestionCard";
+import { useQuestions } from "@/hooks/useQuestions";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const sampleQuestions = [
-  {
-    id: 1,
-    title: "Как решить квадратное уравнение x² + 5x + 6 = 0?",
-    content: "Помогите пожалуйста решить это квадратное уравнение. Я знаю формулу дискриминанта, но путаюсь в вычислениях. Можете объяснить пошагово?",
-    category: "Математика",
-    points: 50,
-    answersCount: 2,
-    likesCount: 15,
-    isExpert: false,
-    authorName: "Алексей Петров",
-    authorRank: "Ученик",
-    timeAgo: "2 часа назад",
-    isBestAnswer: false
-  },
-  {
-    id: 2,
-    title: "Объясните закон сохранения энергии в физике",
-    content: "Изучаю физику и не могу понять принцип работы закона сохранения энергии. Можете привести простые примеры из жизни?",
-    category: "Физика",
-    points: 75,
-    answersCount: 3,
-    likesCount: 23,
-    isExpert: true,
-    authorName: "Мария Иванова",
-    authorRank: "Студент",
-    timeAgo: "4 часа назад",
-    isBestAnswer: true
-  },
-  {
-    id: 3,
-    title: "Разница между Present Simple и Present Continuous?",
-    content: "Постоянно путаю эти времена в английском языке. Когда какое использовать? Есть ли простые правила для запоминания?",
-    category: "Языки",
-    points: 30,
-    answersCount: 1,
-    likesCount: 8,
-    isExpert: false,
-    authorName: "Елена Козлова",
-    authorRank: "Бакалавр",
-    timeAgo: "6 часов назад",
-    isBestAnswer: false
-  },
-  {
-    id: 4,
-    title: "Основные характеристики романтизма в литературе",
-    content: "Готовлюсь к экзамену по литературе. Нужно понять основные черты романтизма. Какие произведения лучше всего отражают этот стиль?",
-    category: "Литература",
-    points: 40,
-    answersCount: 2,
-    likesCount: 12,
-    isExpert: true,
-    authorName: "Дмитрий Смирнов",
-    authorRank: "Магистр",
-    timeAgo: "8 часов назад",
-    isBestAnswer: false
-  },
-  {
-    id: 5,
-    title: "Как найти производную сложной функции?",
-    content: "Изучаю математический анализ. Не понимаю как правильно находить производную когда функция состоит из нескольких частей. Помогите разобраться с правилом цепочки.",
-    category: "Математика",
-    points: 60,
-    answersCount: 1,
-    likesCount: 18,
-    isExpert: false,
-    authorName: "Анна Волкова",
-    authorRank: "Студент",
-    timeAgo: "12 часов назад",
-    isBestAnswer: false
-  }
-];
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+  
+  if (diffInHours < 1) return 'меньше часа назад';
+  if (diffInHours < 24) return `${diffInHours} ${diffInHours === 1 ? 'час' : diffInHours < 5 ? 'часа' : 'часов'} назад`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} ${diffInDays === 1 ? 'день' : diffInDays < 5 ? 'дня' : 'дней'} назад`;
+};
 
 const QuestionFeed = () => {
+  const { questions, loading, voteOnQuestion } = useQuestions();
+
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-foreground">Последние вопросы</h2>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">Сортировать:</span>
+            <select className="text-sm bg-background border border-border rounded-md px-3 py-1">
+              <option>Новые</option>
+              <option>Популярные</option>
+              <option>Без ответов</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="p-6 border border-border rounded-lg space-y-4">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-20 w-full" />
+              <div className="flex justify-between">
+                <div className="flex space-x-4">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between">
@@ -89,17 +66,40 @@ const QuestionFeed = () => {
       </div>
       
       <div className="space-y-4">
-        {sampleQuestions.map((question) => (
-          <QuestionCard key={question.id} {...question} />
-        ))}
+        {questions.length > 0 ? (
+          questions.map((question) => (
+            <QuestionCard 
+              key={question.id} 
+              id={question.id}
+              title={question.title}
+              content={question.content}
+              category={question.category}
+              points={question.points}
+              answersCount={question.answers_count || 0}
+              likesCount={question.likes_count || 0}
+              isExpert={question.is_expert}
+              authorName={question.profiles?.display_name || question.profiles?.username || 'Неизвестный'}
+              authorRank={question.profiles?.role || 'Пользователь'}
+              timeAgo={formatTimeAgo(question.created_at)}
+              isBestAnswer={question.is_solved}
+              userVote={question.user_vote}
+              onVote={voteOnQuestion}
+            />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Пока нет вопросов</p>
+          </div>
+        )}
       </div>
 
-      {/* Load More */}
-      <div className="text-center pt-6">
-        <button className="text-primary hover:text-primary-glow font-medium transition-colors">
-          Загрузить еще вопросы...
-        </button>
-      </div>
+      {questions.length > 0 && (
+        <div className="text-center pt-6">
+          <button className="text-primary hover:text-primary-glow font-medium transition-colors">
+            Загрузить еще вопросы...
+          </button>
+        </div>
+      )}
     </div>
   );
 };

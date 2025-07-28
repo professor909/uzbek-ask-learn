@@ -1,4 +1,4 @@
-import { Search, Plus, Bell, User, Skull, LogOut } from "lucide-react";
+import { Search, Bell, User, Skull, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import CreateQuestionDialog from "./CreateQuestionDialog";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -45,10 +46,7 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             {user ? (
               <>
-                <Button variant="secondary" size="sm" className="font-medium">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Задать вопрос
-                </Button>
+                <CreateQuestionDialog />
                 
                 <Button variant="ghost" size="sm" className="relative">
                   <Bell className="w-4 h-4" />

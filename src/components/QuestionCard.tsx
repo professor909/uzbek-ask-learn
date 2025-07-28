@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Heart, MessageCircle, Star, Award } from "lucide-react";
 
 interface QuestionCardProps {
-  id: number;
+  id: string;
   title: string;
   content: string;
   category: string;
@@ -16,9 +16,12 @@ interface QuestionCardProps {
   authorRank: string;
   timeAgo: string;
   isBestAnswer?: boolean;
+  userVote?: number | null;
+  onVote: (questionId: string, voteType: 1 | -1) => void;
 }
 
 const QuestionCard = ({
+  id,
   title,
   content,
   category,
@@ -29,8 +32,14 @@ const QuestionCard = ({
   authorName,
   authorRank,
   timeAgo,
-  isBestAnswer = false
+  isBestAnswer = false,
+  userVote,
+  onVote
 }: QuestionCardProps) => {
+  
+  const handleVote = (voteType: 1 | -1) => {
+    onVote(id, voteType);
+  };
   return (
     <Card className="hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-subtle border-border/50">
       <CardHeader className="pb-3">
@@ -76,8 +85,13 @@ const QuestionCard = ({
               <MessageCircle className="w-4 h-4 mr-1" />
               {answersCount}/3
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-warm">
-              <Heart className="w-4 h-4 mr-1" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`${userVote === 1 ? 'text-accent-warm' : 'text-muted-foreground hover:text-accent-warm'}`}
+              onClick={() => handleVote(1)}
+            >
+              <Heart className={`w-4 h-4 mr-1 ${userVote === 1 ? 'fill-current' : ''}`} />
               {likesCount}
             </Button>
           </div>

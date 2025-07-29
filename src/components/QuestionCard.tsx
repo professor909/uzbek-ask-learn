@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Heart, MessageCircle, Star, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface QuestionCardProps {
   id: string;
@@ -36,6 +37,7 @@ const QuestionCard = ({
   userVote,
   onVote
 }: QuestionCardProps) => {
+  const navigate = useNavigate();
   
   const handleVote = (voteType: 1 | -1) => {
     onVote(id, voteType);
@@ -62,7 +64,10 @@ const QuestionCard = ({
                 </Badge>
               )}
             </div>
-            <h3 className="text-lg font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+            <h3 
+              className="text-lg font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+              onClick={() => navigate(`/question/${id}`)}
+            >
               {title}
             </h3>
           </div>

@@ -10,6 +10,83 @@ import { useAnswers } from "@/hooks/useAnswers";
 import { useQuestions } from "@/hooks/useQuestions";
 import Header from "@/components/Header";
 
+// SEO Hook for updating page metadata
+const useSEO = (title: string, description: string, url: string) => {
+  useEffect(() => {
+    // Update page title
+    document.title = `${title} - ForSkull`;
+    
+    // Update meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', description);
+
+    // Update Open Graph tags
+    const updateOGTag = (property: string, content: string) => {
+      let ogTag = document.querySelector(`meta[property="${property}"]`);
+      if (!ogTag) {
+        ogTag = document.createElement('meta');
+        ogTag.setAttribute('property', property);
+        document.head.appendChild(ogTag);
+      }
+      ogTag.setAttribute('content', content);
+    };
+
+    updateOGTag('og:title', title);
+    updateOGTag('og:description', description);
+    updateOGTag('og:url', url);
+    updateOGTag('og:type', 'article');
+    updateOGTag('og:site_name', 'ForSkull');
+
+    // Update Twitter Card tags
+    const updateTwitterTag = (name: string, content: string) => {
+      let twitterTag = document.querySelector(`meta[name="${name}"]`);
+      if (!twitterTag) {
+        twitterTag = document.createElement('meta');
+        twitterTag.setAttribute('name', name);
+        document.head.appendChild(twitterTag);
+      }
+      twitterTag.setAttribute('content', content);
+    };
+
+    updateTwitterTag('twitter:card', 'summary');
+    updateTwitterTag('twitter:title', title);
+    updateTwitterTag('twitter:description', description);
+
+    // Add structured data
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "QAPage",
+      "mainEntity": {
+        "@type": "Question",
+        "name": title,
+        "text": description,
+        "url": url,
+        "author": {
+          "@type": "Person",
+          "name": "ForSkull User"
+        }
+      }
+    };
+
+    let scriptTag = document.querySelector('script[type="application/ld+json"]');
+    if (!scriptTag) {
+      scriptTag = document.createElement('script');
+      scriptTag.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptTag);
+    }
+    scriptTag.textContent = JSON.stringify(structuredData);
+
+    return () => {
+      document.title = 'ForSkull - Платформа вопросов и ответов';
+    };
+  }, [title, description, url]);
+};
+
 const QuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -20,6 +97,13 @@ const QuestionDetail = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const question = questions.find(q => q.id === id);
+
+  // SEO optimization
+  const questionTitle = question?.title || 'Вопрос не найден';
+  const questionDescription = question?.content?.substring(0, 160) + '...' || 'Вопрос не найден на ForSkull';
+  const currentUrl = window.location.href;
+  
+  useSEO(questionTitle, questionDescription, currentUrl);
 
   useEffect(() => {
     if (!user) {

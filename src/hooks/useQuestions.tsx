@@ -46,58 +46,81 @@ export const useQuestions = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      if (!questionsData) {
+        setQuestions([]);
+        return;
+      }
 
       // Get answer counts for each question
       const questionsWithCounts = await Promise.all(
         questionsData.map(async (question) => {
-          // Get answer count
-          const { count: answerCount } = await supabase
-            .from('answers')
-            .select('*', { count: 'exact', head: true })
-            .eq('question_id', question.id);
+          try {
+            // Get answer count
+            const { count: answerCount } = await supabase
+              .from('answers')
+              .select('*', { count: 'exact', head: true })
+              .eq('question_id', question.id);
 
-          // Get likes count
-          const { count: likesCount } = await supabase
-            .from('votes')
-            .select('*', { count: 'exact', head: true })
-            .eq('question_id', question.id)
-            .eq('vote_type', 1);
+            // Get likes count
+            const { count: likesCount } = await supabase
+              .from('votes')
+              .select('*', { count: 'exact', head: true })
+              .eq('question_id', question.id)
+              .eq('vote_type', 1);
 
-          // Get user vote if logged in
-          let userVote = null;
-          if (user) {
-            try {
-              const { data: voteData } = await supabase
-                .from('votes')
-                .select('vote_type')
-                .eq('question_id', question.id)
-                .eq('user_id', user.id)
-                .single();
-              userVote = voteData?.vote_type || null;
-            } catch (error) {
-              // Игнорируем ошибки получения голосов - не критично
-              userVote = null;
+            // Get user vote if logged in
+            let userVote = null;
+            if (user) {
+              try {
+                const { data: voteData } = await supabase
+                  .from('votes')
+                  .select('vote_type')
+                  .eq('question_id', question.id)
+                  .eq('user_id', user.id)
+                  .single();
+                userVote = voteData?.vote_type || null;
+              } catch (error) {
+                // Игнорируем ошибки получения голосов - не критично
+                userVote = null;
+              }
             }
-          }
 
-          return {
-            ...question,
-            answers_count: answerCount || 0,
-            likes_count: likesCount || 0,
-            user_vote: userVote,
-            profiles: question.profiles || { username: null, display_name: null, role: null }
-          } as Question;
+            return {
+              ...question,
+              answers_count: answerCount || 0,
+              likes_count: likesCount || 0,
+              user_vote: userVote,
+              profiles: question.profiles || { username: null, display_name: null, role: null }
+            } as Question;
+          } catch (error) {
+            console.error('Error fetching counts for question:', question.id, error);
+            // Возвращаем вопрос с нулевыми счетчиками в случае ошибки
+            return {
+              ...question,
+              answers_count: 0,
+              likes_count: 0,
+              user_vote: null,
+              profiles: question.profiles || { username: null, display_name: null, role: null }
+            } as Question;
+          }
         })
       );
 
       setQuestions(questionsWithCounts);
     } catch (error: any) {
+      console.error('Error fetching questions:', error);
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить вопросы',
+        title: 'Ошибка подключения',
+        description: 'Проверьте интернет-соединение и попробуйте снова',
         variant: 'destructive',
       });
+      // Устанавливаем пустой массив вместо того, чтобы оставлять старые данные
+      setQuestions([]);
     } finally {
       setLoading(false);
     }

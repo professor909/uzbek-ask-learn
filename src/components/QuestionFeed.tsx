@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
-import { MessageSquare, TrendingUp, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MessageSquare } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import QuestionCard from "./QuestionCard";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 import SearchAndFilter from "./SearchAndFilter";
+import QuestionSidebar from "./QuestionSidebar";
 import { useQuestions } from "@/hooks/useQuestions";
 
 const formatTimeAgo = (dateString: string) => {
@@ -134,32 +134,8 @@ const QuestionFeed = () => {
         </div>
 
         {/* Stats sidebar */}
-        <aside className="xl:w-80 space-y-6">{/* xl вместо lg для более позднего переноса */}
-          <Card className="shadow-card border-border/50">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                Статистика
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Вопросов</span>
-                </div>
-                <span className="font-semibold">{questions.length}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Активных пользователей</span>
-                </div>
-                <span className="font-semibold">247</span>
-              </div>
-            </CardContent>
-          </Card>
-        </aside>
+        {/* Боковая панель с блоками - переносится вниз на мобильных */}
+        <QuestionSidebar questionsCount={questions.length} />
       </div>
     </main>
   );

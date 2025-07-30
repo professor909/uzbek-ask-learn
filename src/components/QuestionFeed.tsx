@@ -59,14 +59,16 @@ const QuestionFeed = () => {
 
   return (
     <main className="flex-1">
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 space-y-6">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Вопросы и ответы</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Вопросы и ответы</h1>
               <p className="text-muted-foreground mt-1">Найдите ответы или поделитесь знаниями</p>
             </div>
-            <CreateQuestionDialog />
+            <div className="flex-shrink-0">
+              <CreateQuestionDialog />
+            </div>
           </div>
 
           <SearchAndFilter
@@ -132,7 +134,7 @@ const QuestionFeed = () => {
         </div>
 
         {/* Stats sidebar */}
-        <aside className="lg:w-80 space-y-6">
+        <aside className="xl:w-80 space-y-6">{/* xl вместо lg для более позднего переноса */}
           <Card className="shadow-card border-border/50">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">

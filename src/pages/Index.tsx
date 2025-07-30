@@ -25,10 +25,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <Header />
       <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-6">
-          <QuestionFeed />
-          <Sidebar />
-        </div>
+        <QuestionFeed />
       </div>
     </div>
   );

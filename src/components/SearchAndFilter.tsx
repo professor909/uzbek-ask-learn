@@ -53,7 +53,7 @@ const SearchAndFilter = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
@@ -66,7 +66,7 @@ const SearchAndFilter = ({
         <Button
           variant="outline"
           onClick={() => setShowFilters(!showFilters)}
-          className="relative"
+          className="relative flex-shrink-0"
         >
           <Filter className="w-4 h-4 mr-2" />
           Фильтры
@@ -79,7 +79,7 @@ const SearchAndFilter = ({
       </div>
 
       {showFilters && (
-        <div className="flex gap-3 p-4 bg-muted/30 rounded-lg border border-border/50">
+        <div className="flex flex-col sm:flex-row gap-3 p-4 bg-muted/30 rounded-lg border border-border/50">
           <div className="flex-1">
             <label className="text-sm font-medium text-foreground mb-2 block">
               Категория
@@ -120,7 +120,7 @@ const SearchAndFilter = ({
           </div>
 
           {activeFiltersCount > 0 && (
-            <div className="flex items-end">
+            <div className="flex items-end mt-4 sm:mt-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -128,6 +128,7 @@ const SearchAndFilter = ({
                   onCategoryChange("Все категории");
                   onSortChange("newest");
                 }}
+                className="w-full sm:w-auto"
               >
                 Сбросить
               </Button>

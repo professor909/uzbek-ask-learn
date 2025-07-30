@@ -105,11 +105,7 @@ const QuestionDetail = () => {
   
   useSEO(questionTitle, questionDescription, currentUrl);
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-    }
-  }, [user, navigate]);
+  // Убираем принудительную авторизацию - вопросы доступны всем
 
   if (!question) {
     return (
@@ -276,7 +272,7 @@ const QuestionDetail = () => {
         </div>
 
         {/* Add Answer Form */}
-        {user && (
+        {user ? (
           <Card className="shadow-card border-border/50">
             <CardHeader>
               <h3 className="text-lg font-semibold text-foreground">Ваш ответ</h3>
@@ -301,6 +297,17 @@ const QuestionDetail = () => {
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="shadow-card border-border/50">
+            <CardContent className="text-center py-8">
+              <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Хотите ответить на вопрос?</h3>
+              <p className="text-muted-foreground mb-4">Войдите в свой аккаунт, чтобы поделиться знаниями</p>
+              <Button onClick={() => navigate("/auth")}>
+                Войти в систему
+              </Button>
             </CardContent>
           </Card>
         )}

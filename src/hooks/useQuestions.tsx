@@ -67,13 +67,18 @@ export const useQuestions = () => {
           // Get user vote if logged in
           let userVote = null;
           if (user) {
-            const { data: voteData } = await supabase
-              .from('votes')
-              .select('vote_type')
-              .eq('question_id', question.id)
-              .eq('user_id', user.id)
-              .single();
-            userVote = voteData?.vote_type || null;
+            try {
+              const { data: voteData } = await supabase
+                .from('votes')
+                .select('vote_type')
+                .eq('question_id', question.id)
+                .eq('user_id', user.id)
+                .single();
+              userVote = voteData?.vote_type || null;
+            } catch (error) {
+              // Игнорируем ошибки получения голосов - не критично
+              userVote = null;
+            }
           }
 
           return {
@@ -193,7 +198,7 @@ export const useQuestions = () => {
 
   useEffect(() => {
     fetchQuestions();
-  }, [user]);
+  }, []); // Убираем зависимость от user - загружаем вопросы для всех
 
   return {
     questions,

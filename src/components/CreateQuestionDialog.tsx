@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { useQuestions } from "@/hooks/useQuestions";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   "Математика",
@@ -38,6 +40,8 @@ const CreateQuestionDialog = () => {
   const [loading, setLoading] = useState(false);
   
   const { createQuestion } = useQuestions();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +70,21 @@ const CreateQuestionDialog = () => {
       setLoading(false);
     }
   };
+
+  // Если пользователь не авторизован, показываем кнопку входа
+  if (!user) {
+    return (
+      <Button 
+        variant="secondary" 
+        size="sm" 
+        className="font-medium"
+        onClick={() => navigate("/auth")}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Войти и задать вопрос
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

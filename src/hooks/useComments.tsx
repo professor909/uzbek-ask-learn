@@ -14,7 +14,7 @@ export interface Comment {
     username: string | null;
     display_name: string | null;
     role: string | null;
-  } | null;
+  };
 }
 
 export const useComments = (answerId: string) => {

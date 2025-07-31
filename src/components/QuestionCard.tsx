@@ -43,7 +43,7 @@ const QuestionCard = ({
     onVote(id, voteType);
   };
   return (
-    <Card className="hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-subtle border-border/50">
+    <Card className="group hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-card/50 border-border/50 hover:border-primary/20 animate-fade-in">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -65,7 +65,7 @@ const QuestionCard = ({
               )}
             </div>
             <h3 
-              className="text-lg font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+              className="text-lg font-semibold text-foreground hover:text-primary transition-colors cursor-pointer group-hover:scale-[1.01] transition-transform duration-200"
               onClick={() => navigate(`/question/${id}`)}
             >
               {title}

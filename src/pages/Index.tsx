@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import QuestionFeed from "@/components/QuestionFeed";
+import HeroSection from "@/components/HeroSection";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -25,7 +26,10 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <Header />
       <div className="container mx-auto px-4 py-6">
-        <QuestionFeed />
+        <HeroSection />
+        <div id="questions-section">
+          <QuestionFeed />
+        </div>
       </div>
     </div>
   );

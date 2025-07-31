@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useAnswers } from "@/hooks/useAnswers";
 import { useQuestions } from "@/hooks/useQuestions";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 
 // SEO Hook for updating page metadata
@@ -91,6 +92,7 @@ const QuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { questions, voteOnQuestion } = useQuestions();
   const { answers, loading: answersLoading, createAnswer, voteOnAnswer } = useAnswers(id || '');
   const [newAnswer, setNewAnswer] = useState("");
@@ -132,6 +134,10 @@ const QuestionDetail = () => {
     try {
       await createAnswer(newAnswer.trim());
       setNewAnswer("");
+      toast({
+        title: "Ответ опубликован!",
+        description: "Спасибо за вклад в сообщество. Ваш ответ поможет другим студентам.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -161,7 +167,7 @@ const QuestionDetail = () => {
         </Button>
 
         {/* Question Card */}
-        <Card className="mb-6 shadow-card border-border/50">
+        <Card className="mb-6 shadow-card border-border/50 animate-fade-in">
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -230,8 +236,12 @@ const QuestionDetail = () => {
             </Card>
           ) : (
             <div className="space-y-4">
-              {answers.map((answer) => (
-                <Card key={answer.id} className={`shadow-card border-border/50 ${answer.is_best_answer ? 'ring-2 ring-success/50' : ''}`}>
+              {answers.map((answer, index) => (
+                <Card 
+                  key={answer.id} 
+                  className={`shadow-card border-border/50 animate-fade-in ${answer.is_best_answer ? 'ring-2 ring-success/50 bg-success/5' : ''}`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-start space-x-4">
                       <div className="flex flex-col items-center space-y-2">
@@ -273,7 +283,7 @@ const QuestionDetail = () => {
 
         {/* Add Answer Form */}
         {user ? (
-          <Card className="shadow-card border-border/50">
+          <Card className="shadow-card border-border/50 animate-scale-in">
             <CardHeader>
               <h3 className="text-lg font-semibold text-foreground">Ваш ответ</h3>
             </CardHeader>

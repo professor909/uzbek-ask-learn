@@ -71,7 +71,7 @@ const HeroSection = () => {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+                className="border-white/50 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm font-semibold"
                 onClick={() => {
                   const element = document.getElementById('questions-section');
                   element?.scrollIntoView({ behavior: 'smooth' });

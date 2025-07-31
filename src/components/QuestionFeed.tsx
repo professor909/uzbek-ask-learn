@@ -62,11 +62,11 @@ const QuestionFeed = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Вопросы и ответы</h1>
-              <p className="text-muted-foreground mt-1">Найдите ответы или поделитесь знаниями</p>
+            <div className="animate-fade-in">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-accent-warm bg-clip-text text-transparent">Вопросы и ответы</h1>
+              <p className="text-muted-foreground mt-1">Найдите ответы или поделитесь знаниями с сообществом</p>
             </div>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 animate-scale-in">
               <CreateQuestionDialog />
             </div>
           </div>

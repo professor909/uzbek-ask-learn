@@ -59,7 +59,7 @@ const QuestionFeed = () => {
 
   return (
     <main className="flex-1">
-      <div className="flex flex-col xl:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
@@ -134,8 +134,11 @@ const QuestionFeed = () => {
         </div>
 
         {/* Stats sidebar */}
-        {/* Боковая панель с блоками - переносится вниз на мобильных */}
-        <QuestionSidebar questionsCount={questions.length} />
+        {/* Боковая панель с блоками - переносится вниз на мобильных, на планшетах сбоку */}
+        <QuestionSidebar 
+          questionsCount={questions.length} 
+          onCategoryClick={(category) => setSelectedCategory(category)}
+        />
       </div>
     </main>
   );

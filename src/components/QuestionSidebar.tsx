@@ -1,32 +1,34 @@
-import { TrendingUp, Users, Hash, Star } from "lucide-react";
+import { TrendingUp, Users, Hash, Star, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface QuestionSidebarProps {
   questionsCount: number;
+  onCategoryClick?: (category: string) => void;
 }
 
 const categories = [
-  { name: "Математика", count: 45, color: "bg-blue-500" },
-  { name: "Физика", count: 32, color: "bg-green-500" },
-  { name: "Информатика", count: 28, color: "bg-purple-500" },
-  { name: "Химия", count: 24, color: "bg-red-500" },
-  { name: "Биология", count: 19, color: "bg-yellow-500" },
-  { name: "История", count: 15, color: "bg-orange-500" },
+  { name: "Математика", count: 45, color: "hsl(217, 91%, 60%)", bgColor: "hsl(217, 91%, 95%)" },
+  { name: "Физика", count: 32, color: "hsl(142, 76%, 36%)", bgColor: "hsl(142, 76%, 95%)" },
+  { name: "Информатика", count: 28, color: "hsl(271, 91%, 65%)", bgColor: "hsl(271, 91%, 95%)" },
+  { name: "Химия", count: 24, color: "hsl(0, 84%, 60%)", bgColor: "hsl(0, 84%, 95%)" },
+  { name: "Биология", count: 19, color: "hsl(48, 96%, 53%)", bgColor: "hsl(48, 96%, 95%)" },
+  { name: "История", count: 15, color: "hsl(25, 95%, 53%)", bgColor: "hsl(25, 95%, 95%)" },
 ];
 
 const topUsers = [
-  { name: "Алексей К.", points: 2450, answers: 89, rank: "Эксперт" },
-  { name: "Мария В.", points: 1950, answers: 67, rank: "Профи" },
-  { name: "Дмитрий С.", points: 1720, answers: 54, rank: "Профи" },
-  { name: "Анна М.", points: 1500, answers: 45, rank: "Активист" },
-  { name: "Игорь Л.", points: 1280, answers: 38, rank: "Активист" },
+  { name: "Алексей К.", points: 2450, answers: 89, rank: "Гуру" },
+  { name: "Мария В.", points: 1950, answers: 67, rank: "Мастер" },
+  { name: "Дмитрий С.", points: 1720, answers: 54, rank: "Знаток" },
+  { name: "Анна М.", points: 1500, answers: 45, rank: "Ученик" },
+  { name: "Игорь Л.", points: 1280, answers: 38, rank: "Новичок" },
 ];
 
-const QuestionSidebar = ({ questionsCount }: QuestionSidebarProps) => {
+const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarProps) => {
   return (
-    <aside className="xl:w-80 space-y-6">
+    <aside className="w-full lg:w-80 space-y-6">
       {/* Статистика */}
       <Card className="shadow-card border-border/50">
         <CardHeader>
@@ -61,17 +63,28 @@ const QuestionSidebar = ({ questionsCount }: QuestionSidebarProps) => {
             Популярные категории
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {categories.map((category, index) => (
-            <div key={category.name} className="flex items-center justify-between">
+            <Button
+              key={category.name}
+              variant="ghost"
+              className="w-full justify-between h-auto p-3 hover:bg-secondary/80 transition-colors"
+              onClick={() => onCategoryClick?.(category.name)}
+            >
               <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${category.color}`} />
-                <span className="text-sm font-medium">{category.name}</span>
+                <div 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: category.color }}
+                />
+                <span className="text-sm font-medium text-left">{category.name}</span>
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {category.count}
-              </Badge>
-            </div>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="text-xs">
+                  {category.count}
+                </Badge>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </Button>
           ))}
         </CardContent>
       </Card>
@@ -81,7 +94,7 @@ const QuestionSidebar = ({ questionsCount }: QuestionSidebarProps) => {
         <CardHeader>
           <CardTitle className="text-lg flex items-center">
             <Star className="w-5 h-5 mr-2 text-primary" />
-            Топ участники
+            Топ участники месяца
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

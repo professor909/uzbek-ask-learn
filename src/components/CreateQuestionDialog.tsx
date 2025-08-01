@@ -8,19 +8,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus } from "lucide-react";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
+import { ImageUpload } from "./ImageUpload";
 
 const categories = [
-  "Математика",
-  "Физика", 
-  "Языки",
-  "Литература",
-  "Искусство",
-  "История",
-  "Биология",
-  "Химия",
-  "Информатика",
-  "Психология"
+  "math",
+  "physics", 
+  "programming",
+  "literature",
+  "art",
+  "history",
+  "biology",
+  "chemistry",
+  "economics",
+  "other"
 ];
 
 const pointOptions = [
@@ -37,34 +39,50 @@ const CreateQuestionDialog = () => {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [points, setPoints] = useState(25);
+  const [language, setLanguageState] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   
   const { createQuestion } = useQuestions();
   const { user } = useAuth();
+  const { language: currentLanguage, t } = useLanguage();
   const navigate = useNavigate();
+
+  // Set default language when dialog opens
+  useState(() => {
+    if (open && !language) {
+      setLanguageState(currentLanguage);
+    }
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !content.trim() || !category) {
+    if (!title.trim() || !content.trim() || !category || !language) {
       return;
     }
 
     setLoading(true);
     try {
-      await createQuestion({
+      const questionData = {
         title: title.trim(),
         content: content.trim(),
         category,
         points,
-        is_expert: points >= 75
-      });
+        language,
+        is_expert: points >= 75,
+        ...(imageUrl && { image_url: imageUrl })
+      };
+      
+      await createQuestion(questionData);
       
       // Reset form
       setTitle("");
       setContent("");
       setCategory("");
       setPoints(25);
+      setLanguageState("");
+      setImageUrl("");
       setOpen(false);
     } finally {
       setLoading(false);
@@ -81,22 +99,27 @@ const CreateQuestionDialog = () => {
         onClick={() => navigate("/auth")}
       >
         <Plus className="w-4 h-4 mr-2" />
-        Войти и задать вопрос
+        {t('header.login')} и {t('questions.askQuestion').toLowerCase()}
       </Button>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (isOpen && !language) {
+        setLanguageState(currentLanguage);
+      }
+    }}>
       <DialogTrigger asChild>
         <Button variant="secondary" size="sm" className="font-medium">
           <Plus className="w-4 h-4 mr-2" />
-          Задать вопрос
+          {t('questions.askQuestion')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">{/* Мобильная адаптивность */}
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
-          <DialogTitle>Задать новый вопрос</DialogTitle>
+          <DialogTitle>{t('questions.createQuestion')}</DialogTitle>
           <DialogDescription>
             Опишите ваш вопрос подробно, чтобы получить качественный ответ
           </DialogDescription>
@@ -104,10 +127,10 @@ const CreateQuestionDialog = () => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Заголовок вопроса</Label>
+            <Label htmlFor="title">{t('question.title')}</Label>
             <Input
               id="title"
-              placeholder="Кратко опишите ваш вопрос..."
+              placeholder={t('question.titlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={loading}
@@ -116,10 +139,10 @@ const CreateQuestionDialog = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="content">Подробное описание</Label>
+            <Label htmlFor="content">{t('question.content')}</Label>
             <Textarea
               id="content"
-              placeholder="Подробно опишите ваш вопрос, добавьте контекст, что вы уже пробовали..."
+              placeholder={t('question.contentPlaceholder')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               disabled={loading}
@@ -127,18 +150,27 @@ const CreateQuestionDialog = () => {
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label>{t('question.attachImage')}</Label>
+            <ImageUpload
+              onImageUploaded={setImageUrl}
+              onImageRemoved={() => setImageUrl("")}
+              uploadedImage={imageUrl}
+            />
+          </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{/* Адаптивная сетка */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Категория</Label>
+              <Label htmlFor="category">{t('question.category')}</Label>
               <Select value={category} onValueChange={setCategory} disabled={loading} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Выберите категорию" />
+                  <SelectValue placeholder={t('question.selectCategory')} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>
-                      {cat}
+                      {t(`category.${cat}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -146,7 +178,7 @@ const CreateQuestionDialog = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="points">Баллы за ответ</Label>
+              <Label htmlFor="points">{t('question.points')}</Label>
               <Select value={points.toString()} onValueChange={(value) => setPoints(parseInt(value))} disabled={loading}>
                 <SelectTrigger>
                   <SelectValue />
@@ -160,14 +192,27 @@ const CreateQuestionDialog = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="language">{t('question.language')}</Label>
+              <Select value={language} onValueChange={setLanguageState} disabled={loading} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите язык" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ru">🇷🇺 Русский</SelectItem>
+                  <SelectItem value="uz">🇺🇿 O'zbek</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">{/* Адаптивные кнопки */}
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="w-full sm:w-auto">
-              Отмена
+              {t('question.cancel')}
             </Button>
-            <Button type="submit" disabled={loading || !title.trim() || !content.trim() || !category} className="w-full sm:w-auto">
-              {loading ? "Создание..." : "Создать вопрос"}
+            <Button type="submit" disabled={loading || !title.trim() || !content.trim() || !category || !language} className="w-full sm:w-auto">
+              {loading ? t('question.creating') : t('question.create')}
             </Button>
           </div>
         </form>

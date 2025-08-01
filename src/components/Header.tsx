@@ -1,8 +1,9 @@
-import { Search, Bell, User, Skull, LogOut } from "lucide-react";
+import { Search, Bell, User, Skull, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import CreateQuestionDialog from "./CreateQuestionDialog";
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -36,7 +38,7 @@ const Header = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Поиск вопросов..." 
+                placeholder={t('search.placeholder')}
                 className="pl-10 bg-muted/50 border-0 focus:bg-background transition-colors"
               />
             </div>
@@ -44,6 +46,24 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
+            {/* Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                  <Globe className="w-4 h-4" />
+                  <span className="text-xs font-medium">{language.toUpperCase()}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setLanguage('ru')}>
+                  🇷🇺 Русский
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage('uz')}>
+                  🇺🇿 O'zbek
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {user ? (
               <>
                 <CreateQuestionDialog />
@@ -60,15 +80,15 @@ const Header = () => {
                     <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                       <User className="w-4 h-4" />
                       <div className="flex flex-col items-start">
-                        <span className="text-xs text-muted-foreground">125 баллов</span>
-                        <span className="text-sm font-medium">Студент</span>
+                        <span className="text-xs text-muted-foreground">125 {t('header.points')}</span>
+                        <span className="text-sm font-medium">{t('header.student')}</span>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
-                      Выйти
+                      {t('header.logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -76,7 +96,7 @@ const Header = () => {
             ) : (
               <Link to="/auth">
                 <Button variant="secondary" size="sm" className="font-medium">
-                  Войти
+                  {t('header.login')}
                 </Button>
               </Link>
             )}

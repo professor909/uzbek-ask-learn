@@ -8,9 +8,11 @@ export interface Answer {
   content: string;
   question_id: string;
   user_id: string;
+  language: string;
   is_best_answer: boolean;
   created_at: string;
   updated_at: string;
+  image_url?: string;
   profiles: {
     username: string | null;
     display_name: string | null;
@@ -91,7 +93,7 @@ export const useAnswers = (questionId: string) => {
     }
   };
 
-  const createAnswer = async (content: string) => {
+  const createAnswer = async (content: string, imageUrl?: string, language?: string) => {
     if (!user || !questionId) {
       toast({
         title: 'Ошибка',
@@ -106,6 +108,8 @@ export const useAnswers = (questionId: string) => {
         content: content.trim(),
         question_id: questionId,
         user_id: user.id,
+        language: language || 'ru',
+        ...(imageUrl && { image_url: imageUrl })
       });
 
       if (error) throw error;

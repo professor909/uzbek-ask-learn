@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           id: string
           is_best_answer: boolean | null
+          language: string
           question_id: string
           updated_at: string
           user_id: string
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_best_answer?: boolean | null
+          language?: string
           question_id: string
           updated_at?: string
           user_id: string
@@ -38,6 +40,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_best_answer?: boolean | null
+          language?: string
           question_id?: string
           updated_at?: string
           user_id?: string
@@ -141,6 +144,7 @@ export type Database = {
           id: string
           is_expert: boolean | null
           is_solved: boolean | null
+          language: string
           points: number
           title: string
           updated_at: string
@@ -153,6 +157,7 @@ export type Database = {
           id?: string
           is_expert?: boolean | null
           is_solved?: boolean | null
+          language?: string
           points?: number
           title: string
           updated_at?: string
@@ -165,6 +170,7 @@ export type Database = {
           id?: string
           is_expert?: boolean | null
           is_solved?: boolean | null
+          language?: string
           points?: number
           title?: string
           updated_at?: string

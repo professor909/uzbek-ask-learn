@@ -6,6 +6,7 @@ import CreateQuestionDialog from "./CreateQuestionDialog";
 import SearchAndFilter from "./SearchAndFilter";
 import QuestionSidebar from "./QuestionSidebar";
 import { useQuestions } from "@/hooks/useQuestions";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
@@ -21,8 +22,9 @@ const formatTimeAgo = (dateString: string) => {
 
 const QuestionFeed = () => {
   const { questions, loading, voteOnQuestion } = useQuestions();
+  const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Все категории");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
   // Filter and sort questions
@@ -30,8 +32,9 @@ const QuestionFeed = () => {
     let filtered = questions.filter(question => {
       const matchesSearch = question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            question.content.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "Все категории" || question.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const matchesCategory = selectedCategory === "all" || question.category === selectedCategory;
+      const matchesLanguage = question.language === language;
+      return matchesSearch && matchesCategory && matchesLanguage;
     });
 
     // Sort questions
@@ -63,8 +66,8 @@ const QuestionFeed = () => {
         <div className="flex-1 space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div className="animate-fade-in">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-accent-warm bg-clip-text text-transparent">Вопросы и ответы</h1>
-              <p className="text-muted-foreground mt-1">Найдите ответы или поделитесь знаниями с сообществом</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-accent-warm bg-clip-text text-transparent">{t('questions.title')}</h1>
+              <p className="text-muted-foreground mt-1">{t('questions.subtitle')}</p>
             </div>
             <div className="flex-shrink-0 animate-scale-in">
               <CreateQuestionDialog />
@@ -97,15 +100,15 @@ const QuestionFeed = () => {
               <CardContent className="text-center py-12">
                 <MessageSquare className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {searchQuery || selectedCategory !== "Все категории" ? "Ничего не найдено" : "Пока нет вопросов"}
+                  {searchQuery || selectedCategory !== "all" ? t('questions.noQuestions') : t('questions.noQuestions')}
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  {searchQuery || selectedCategory !== "Все категории" 
-                    ? "Попробуйте изменить параметры поиска"
-                    : "Станьте первым, кто задаст вопрос!"
+                  {searchQuery || selectedCategory !== "all" 
+                    ? t('questions.noQuestionsDesc')
+                    : t('questions.noQuestionsDesc')
                   }
                 </p>
-                {!searchQuery && selectedCategory === "Все категории" && <CreateQuestionDialog />}
+                {!searchQuery && selectedCategory === "all" && <CreateQuestionDialog />}
               </CardContent>
             </Card>
           ) : (

@@ -9,10 +9,12 @@ export interface Question {
   content: string;
   category: string;
   points: number;
+  language: string;
   is_expert: boolean;
   is_solved: boolean;
   created_at: string;
   user_id: string;
+  image_url?: string;
   profiles: {
     username: string | null;
     display_name: string | null;
@@ -131,7 +133,9 @@ export const useQuestions = () => {
     content: string;
     category: string;
     points: number;
+    language: string;
     is_expert?: boolean;
+    image_url?: string;
   }) => {
     if (!user) {
       toast({

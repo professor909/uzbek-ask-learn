@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SearchAndFilterProps {
   searchQuery: string;
@@ -15,17 +16,17 @@ interface SearchAndFilterProps {
 }
 
 const categories = [
-  "Все категории",
-  "Математика",
-  "Физика", 
-  "Языки",
-  "Литература",
-  "Искусство",
-  "История",
-  "Биология",
-  "Химия",
-  "Информатика",
-  "Психология"
+  "all",
+  "math",
+  "physics", 
+  "programming",
+  "literature",
+  "art",
+  "history",
+  "biology",
+  "chemistry",
+  "economics",
+  "other"
 ];
 
 const sortOptions = [
@@ -45,9 +46,10 @@ const SearchAndFilter = ({
   onSortChange,
 }: SearchAndFilterProps) => {
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = useLanguage();
 
   const activeFiltersCount = [
-    selectedCategory !== "Все категории",
+    selectedCategory !== "all",
     sortBy !== "newest"
   ].filter(Boolean).length;
 
@@ -57,7 +59,7 @@ const SearchAndFilter = ({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Найти вопрос..."
+            placeholder={t('questions.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
@@ -91,7 +93,7 @@ const SearchAndFilter = ({
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category}
+                    {category === "all" ? t('questions.allCategories') : t(`category.${category}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -125,7 +127,7 @@ const SearchAndFilter = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  onCategoryChange("Все категории");
+                  onCategoryChange("all");
                   onSortChange("newest");
                 }}
                 className="w-full sm:w-auto"
@@ -140,11 +142,11 @@ const SearchAndFilter = ({
       {/* Active filters display */}
       {activeFiltersCount > 0 && (
         <div className="flex gap-2 flex-wrap">
-          {selectedCategory !== "Все категории" && (
+          {selectedCategory !== "all" && (
             <Badge variant="secondary" className="gap-1">
-              {selectedCategory}
+              {selectedCategory === "all" ? t('questions.allCategories') : t(`category.${selectedCategory}`)}
               <button
-                onClick={() => onCategoryChange("Все категории")}
+                onClick={() => onCategoryChange("all")}
                 className="ml-1 hover:bg-destructive/20 rounded-full w-4 h-4 flex items-center justify-center text-xs"
               >
                 ×

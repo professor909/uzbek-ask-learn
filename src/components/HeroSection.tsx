@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 
 const HeroSection = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [animateStats, setAnimateStats] = useState(false);
 
@@ -36,7 +38,7 @@ const HeroSection = () => {
                 className="bg-white/10 border-white/20 text-white backdrop-blur-sm animate-fade-in"
               >
                 <Sparkles className="w-3 h-3 mr-1" />
-                Лучший образовательный форум
+                {t('hero.title')}
               </Badge>
               <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight animate-scale-in">
                 Место, где{" "}
@@ -51,8 +53,7 @@ const HeroSection = () => {
             </div>
             
             <p className="text-lg lg:text-xl text-white/90 leading-relaxed animate-fade-in">
-              Задавайте вопросы, получайте качественные ответы от экспертов и делитесь знаниями 
-              с сообществом студентов и преподавателей.
+              {t('hero.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-in-right">
@@ -64,7 +65,7 @@ const HeroSection = () => {
                   className="bg-white text-primary hover:bg-white/90 font-semibold px-8"
                   onClick={() => navigate("/auth")}
                 >
-                  Начать задавать вопросы
+                  {t('questions.askQuestion')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               )}
@@ -77,7 +78,7 @@ const HeroSection = () => {
                   element?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Изучить вопросы
+                {t('hero.exploreQuestions')}
               </Button>
             </div>
           </div>

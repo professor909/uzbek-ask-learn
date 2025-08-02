@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import QuestionFeed from "@/components/QuestionFeed";
 import HeroSection from "@/components/HeroSection";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -31,6 +32,7 @@ const Index = () => {
           <QuestionFeed />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

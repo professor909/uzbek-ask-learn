@@ -67,15 +67,35 @@ const translations = {
     'question.creating': 'Создание...',
     
     // Categories
+    'category.algebra': 'Алгебра',
+    'category.english': 'Английский язык',
+    'category.astronomy': 'Астрономия',
+    'category.biology': 'Биология',
+    'category.worldHistory': 'Всемирная история',
+    'category.geography': 'География',
+    'category.geometry': 'Геометрия',
+    'category.naturalScience': 'Естественные науки',
+    'category.informatics': 'Информатика',
+    'category.uzbekHistory': 'История Узбекистана',
+    'category.literature': 'Литература',
     'category.math': 'Математика',
-    'category.programming': 'Программирование',
+    'category.russian': 'Русский язык',
+    'category.uzbek': 'Узбекский язык',
     'category.physics': 'Физика',
     'category.chemistry': 'Химия',
-    'category.biology': 'Биология',
-    'category.history': 'История',
-    'category.literature': 'Литература',
     'category.economics': 'Экономика',
     'category.other': 'Другое',
+    
+    // Sidebar
+    'sidebar.statistics': 'Статистика',
+    'sidebar.questions': 'Вопросов',
+    'sidebar.activeUsers': 'Активных пользователей',
+    'sidebar.popularCategories': 'Популярные категории',
+    'sidebar.topUsers': 'Топ участники месяца',
+    'sidebar.points': 'баллов',
+    'sidebar.answers': 'ответов',
+    'sidebar.categories': 'Категории',
+    'sidebar.quickStats': 'Ответов',
     
     // Answer Form
     'answer.placeholder': 'Напишите ваш ответ...',
@@ -105,6 +125,14 @@ const translations = {
     'profile.reputation.advanced': 'Продвинутый',
     'profile.reputation.intermediate': 'Опытный',
     'profile.reputation.novice': 'Новичок',
+
+    // Footer
+    'footer.terms': 'Условия пользования',
+    'footer.copyright': 'Авторское право',
+    'footer.privacy': 'Политика конфиденциальности',
+    'footer.careers': 'Вакансии',
+    'footer.about': 'О нас',
+    'footer.slogan': 'Образование — это самое мощное оружие, которое можно использовать, чтобы изменить мир',
 
     // Common
     'common.yes': 'Да',
@@ -171,15 +199,35 @@ const translations = {
     'question.creating': 'Yaratilmoqda...',
     
     // Categories
+    'category.algebra': 'Algebra',
+    'category.english': 'Ingliz tili',
+    'category.astronomy': 'Astronomiya',
+    'category.biology': 'Biologiya',
+    'category.worldHistory': 'Jahon tarixi',
+    'category.geography': 'Geografiya',
+    'category.geometry': 'Geometriya',
+    'category.naturalScience': 'Tabiiy fanlar',
+    'category.informatics': 'Informatika',
+    'category.uzbekHistory': 'O\'zbekiston tarixi',
+    'category.literature': 'Adabiyot',
     'category.math': 'Matematika',
-    'category.programming': 'Dasturlash',
+    'category.russian': 'Rus tili',
+    'category.uzbek': 'O\'zbek tili',
     'category.physics': 'Fizika',
     'category.chemistry': 'Kimyo',
-    'category.biology': 'Biologiya',
-    'category.history': 'Tarix',
-    'category.literature': 'Adabiyot',
     'category.economics': 'Iqtisodiyot',
     'category.other': 'Boshqa',
+    
+    // Sidebar
+    'sidebar.statistics': 'Statistika',
+    'sidebar.questions': 'Savollar',
+    'sidebar.activeUsers': 'Faol foydalanuvchilar',
+    'sidebar.popularCategories': 'Mashhur kategoriyalar',
+    'sidebar.topUsers': 'Oyning eng yaxshi ishtirokchilari',
+    'sidebar.points': 'ball',
+    'sidebar.answers': 'javob',
+    'sidebar.categories': 'Kategoriyalar',
+    'sidebar.quickStats': 'Javoblar',
     
     // Answer Form
     'answer.placeholder': 'Javobingizni yozing...',
@@ -209,6 +257,14 @@ const translations = {
     'profile.reputation.advanced': 'Ilg\'or',
     'profile.reputation.intermediate': 'Tajribali',
     'profile.reputation.novice': 'Yangi boshlovchi',
+
+    // Footer
+    'footer.terms': 'Foydalanish shartlari',
+    'footer.copyright': 'Mualliflik huquqi',
+    'footer.privacy': 'Maxfiylik siyosati',
+    'footer.careers': 'Ish o\'rinlari',
+    'footer.about': 'Biz haqimizda',
+    'footer.slogan': 'Ta\'lim - dunyoni o\'zgartirish uchun ishlatilishi mumkin bo\'lgan eng kuchli quroldir',
 
     // Common
     'common.yes': 'Ha',

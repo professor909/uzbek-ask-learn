@@ -13,13 +13,21 @@ import { useNavigate } from "react-router-dom";
 import { ImageUpload } from "./ImageUpload";
 
 const categories = [
-  "math",
-  "physics", 
-  "programming",
-  "literature",
-  "art",
-  "history",
+  "algebra",
+  "english",
+  "astronomy", 
   "biology",
+  "worldHistory",
+  "geography",
+  "geometry",
+  "naturalScience",
+  "informatics",
+  "uzbekHistory",
+  "literature",
+  "math",
+  "russian",
+  "uzbek",
+  "physics",
   "chemistry",
   "economics",
   "other"

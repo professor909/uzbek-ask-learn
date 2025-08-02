@@ -10,6 +10,7 @@ import { useAnswers } from "@/hooks/useAnswers";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import { ImageUpload } from "@/components/ImageUpload";
 
 // SEO Hook for updating page metadata
 const useSEO = (title: string, description: string, url: string) => {
@@ -96,6 +97,7 @@ const QuestionDetail = () => {
   const { questions, voteOnQuestion } = useQuestions();
   const { answers, loading: answersLoading, createAnswer, voteOnAnswer } = useAnswers(id || '');
   const [newAnswer, setNewAnswer] = useState("");
+  const [answerImage, setAnswerImage] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
 
   const question = questions.find(q => q.id === id);
@@ -297,6 +299,14 @@ const QuestionDetail = () => {
                   disabled={submitting}
                   required
                 />
+                
+                <ImageUpload
+                  onImageUploaded={setAnswerImage}
+                  onImageRemoved={() => setAnswerImage("")}
+                  uploadedImage={answerImage}
+                  maxSize={2 * 1024 * 1024} // 2MB for answers
+                />
+                
                 <div className="flex justify-end">
                   <Button 
                     type="submit" 

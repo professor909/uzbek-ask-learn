@@ -15,10 +15,10 @@ const HeroSection = () => {
   const [animateStats, setAnimateStats] = useState(false);
 
   const stats = [
-    { icon: BookOpen, label: "Активных вопросов", value: "1,247", color: "text-primary" },
-    { icon: Users, label: "Участников", value: "3,891", color: "text-accent-warm" },
-    { icon: Award, label: "Экспертов", value: "127", color: "text-expert" },
-    { icon: TrendingUp, label: "Решённых задач", value: "892", color: "text-success" },
+    { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: "1,247", color: "text-primary" },
+    { icon: Users, labelKey: "hero.stats.participants", value: "3,891", color: "text-accent-warm" },
+    { icon: Award, labelKey: "hero.stats.experts", value: "127", color: "text-expert" },
+    { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: "892", color: "text-success" },
   ];
 
   return (
@@ -41,14 +41,7 @@ const HeroSection = () => {
                 {t('hero.title')}
               </Badge>
               <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight animate-scale-in">
-                Место, где{" "}
-                <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  знания
-                </span>{" "}
-                встречают{" "}
-                <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
-                  любопытство
-                </span>
+                {t('hero.slogan')}
               </h1>
             </div>
             
@@ -89,7 +82,7 @@ const HeroSection = () => {
               const Icon = stat.icon;
               return (
                 <Card 
-                  key={stat.label}
+                  key={stat.labelKey}
                   className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                   onMouseEnter={() => setAnimateStats(true)}
@@ -100,7 +93,7 @@ const HeroSection = () => {
                       {stat.value}
                     </div>
                     <div className="text-sm text-white/80">
-                      {stat.label}
+                      {t(stat.labelKey)}
                     </div>
                   </CardContent>
                 </Card>
@@ -114,18 +107,18 @@ const HeroSection = () => {
           <div className="grid sm:grid-cols-3 gap-4 text-center">
             <div className="space-y-2">
               <BookOpen className="w-6 h-6 text-white/80 mx-auto" />
-              <h3 className="font-medium text-white">Задавайте вопросы</h3>
-              <p className="text-sm text-white/70">Получите помощь от экспертов</p>
+              <h3 className="font-medium text-white">{t('hero.actions.askQuestions')}</h3>
+              <p className="text-sm text-white/70">{t('hero.actions.askQuestionsDesc')}</p>
             </div>
             <div className="space-y-2">
               <Users className="w-6 h-6 text-white/80 mx-auto" />
-              <h3 className="font-medium text-white">Помогайте другим</h3>
-              <p className="text-sm text-white/70">Делитесь своими знаниями</p>
+              <h3 className="font-medium text-white">{t('hero.actions.helpOthers')}</h3>
+              <p className="text-sm text-white/70">{t('hero.actions.helpOthersDesc')}</p>
             </div>
             <div className="space-y-2">
               <Award className="w-6 h-6 text-white/80 mx-auto" />
-              <h3 className="font-medium text-white">Зарабатывайте баллы</h3>
-              <p className="text-sm text-white/70">Становитесь экспертом</p>
+              <h3 className="font-medium text-white">{t('hero.actions.earnPoints')}</h3>
+              <p className="text-sm text-white/70">{t('hero.actions.earnPointsDesc')}</p>
             </div>
           </div>
         </div>

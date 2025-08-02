@@ -247,6 +247,17 @@ const Profile = () => {
     if (!event.target.files || !event.target.files[0] || !user) return;
 
     const file = event.target.files[0];
+    
+    // Check file size (200kb for avatars)
+    if (file.size > 200 * 1024) {
+      toast({
+        title: "Файл слишком большой",
+        description: "Размер аватара не должен превышать 200 кб",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/avatar.${fileExt}`;
 

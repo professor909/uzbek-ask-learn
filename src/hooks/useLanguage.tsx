@@ -22,7 +22,18 @@ const translations = {
     // Hero Section
     'hero.title': 'Образовательная платформа ForSkull',
     'hero.subtitle': 'Место, где студенты делятся знаниями и получают ответы на свои вопросы',
+    'hero.slogan': 'Место, где знания встречают любопытство',
     'hero.exploreQuestions': 'Изучить вопросы',
+    'hero.stats.activeQuestions': 'Активных вопросов',
+    'hero.stats.participants': 'Участников',
+    'hero.stats.experts': 'Экспертов',
+    'hero.stats.solvedTasks': 'Решённых задач',
+    'hero.actions.askQuestions': 'Задавайте вопросы',
+    'hero.actions.askQuestionsDesc': 'Получите помощь от экспертов',
+    'hero.actions.helpOthers': 'Помогайте другим',
+    'hero.actions.helpOthersDesc': 'Делитесь своими знаниями',
+    'hero.actions.earnPoints': 'Зарабатывайте баллы',
+    'hero.actions.earnPointsDesc': 'Становитесь экспертом',
     
     // Questions
     'questions.title': 'Последние вопросы',
@@ -85,6 +96,16 @@ const translations = {
     'time.monthAgo': 'месяц назад',
     'time.monthsAgo': 'месяцев назад',
     
+    // Profile & Stats
+    'profile.questions': 'Вопросов',
+    'profile.answers': 'Ответов',
+    'profile.likes': 'Лайков',
+    'profile.bestAnswers': 'Лучших',
+    'profile.reputation.expert': 'Эксперт',
+    'profile.reputation.advanced': 'Продвинутый',
+    'profile.reputation.intermediate': 'Опытный',
+    'profile.reputation.novice': 'Новичок',
+
     // Common
     'common.yes': 'Да',
     'common.no': 'Нет',
@@ -105,7 +126,18 @@ const translations = {
     // Hero Section
     'hero.title': 'ForSkull ta\'lim platformasi',
     'hero.subtitle': 'Talabalar bilim almashib, savollariga javob oladigan joy',
+    'hero.slogan': 'Bilim va qiziqish uchrashgan joy',
     'hero.exploreQuestions': 'Savollarni ko\'rish',
+    'hero.stats.activeQuestions': 'Faol savollar',
+    'hero.stats.participants': 'Ishtirokchilar',
+    'hero.stats.experts': 'Ekspertlar',
+    'hero.stats.solvedTasks': 'Hal qilingan vazifalar',
+    'hero.actions.askQuestions': 'Savol bering',
+    'hero.actions.askQuestionsDesc': 'Ekspertlardan yordam oling',
+    'hero.actions.helpOthers': 'Boshqalarga yordam bering',
+    'hero.actions.helpOthersDesc': 'Bilimingiz bilan bo\'lishing',
+    'hero.actions.earnPoints': 'Ball to\'plang',
+    'hero.actions.earnPointsDesc': 'Ekspert bo\'ling',
     
     // Questions
     'questions.title': 'Oxirgi savollar',
@@ -168,6 +200,16 @@ const translations = {
     'time.monthAgo': 'bir oy oldin',
     'time.monthsAgo': 'oy oldin',
     
+    // Profile & Stats
+    'profile.questions': 'Savollar',
+    'profile.answers': 'Javoblar',
+    'profile.likes': 'Yoqtirishlar',
+    'profile.bestAnswers': 'Eng yaxshi',
+    'profile.reputation.expert': 'Ekspert',
+    'profile.reputation.advanced': 'Ilg\'or',
+    'profile.reputation.intermediate': 'Tajribali',
+    'profile.reputation.novice': 'Yangi boshlovchi',
+
     // Common
     'common.yes': 'Ha',
     'common.no': "Yo'q",

@@ -10,9 +10,17 @@ interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
   onImageRemoved: () => void;
   uploadedImage?: string;
+  maxSize?: number; // in bytes
+  bucketName?: string;
 }
 
-export const ImageUpload = ({ onImageUploaded, onImageRemoved, uploadedImage }: ImageUploadProps) => {
+export const ImageUpload = ({ 
+  onImageUploaded, 
+  onImageRemoved, 
+  uploadedImage, 
+  maxSize = 2 * 1024 * 1024, // 2MB default
+  bucketName = 'images' 
+}: ImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useLanguage();
@@ -27,9 +35,11 @@ export const ImageUpload = ({ onImageUploaded, onImageRemoved, uploadedImage }: 
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Размер файла не должен превышать 5MB');
+    // Validate file size
+    if (file.size > maxSize) {
+      const maxSizeMB = maxSize / (1024 * 1024);
+      const maxSizeText = maxSizeMB < 1 ? `${Math.round(maxSize / 1024)} кб` : `${maxSizeMB} мб`;
+      toast.error(`Размер файла не должен превышать ${maxSizeText}`);
       return;
     }
 
@@ -40,13 +50,13 @@ export const ImageUpload = ({ onImageUploaded, onImageRemoved, uploadedImage }: 
       const filePath = `images/${fileName}`;
 
       const { error } = await supabase.storage
-        .from('images')
+        .from(bucketName)
         .upload(filePath, file);
 
       if (error) throw error;
 
       const { data } = supabase.storage
-        .from('images')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       onImageUploaded(data.publicUrl);

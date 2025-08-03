@@ -92,17 +92,49 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "experts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
+      }
+      experts_cache: {
+        Row: {
+          answers_count: number | null
+          avatar_url: string | null
+          best_answers_count: number | null
+          display_name: string | null
+          expert_categories: string[] | null
+          expert_since: string | null
+          id: string
+          points: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          answers_count?: number | null
+          avatar_url?: string | null
+          best_answers_count?: number | null
+          display_name?: string | null
+          expert_categories?: string[] | null
+          expert_since?: string | null
+          id: string
+          points?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          answers_count?: number | null
+          avatar_url?: string | null
+          best_answers_count?: number | null
+          display_name?: string | null
+          expert_categories?: string[] | null
+          expert_since?: string | null
+          id?: string
+          points?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -238,22 +270,21 @@ export type Database = {
       }
     }
     Views: {
-      experts: {
-        Row: {
-          answers_count: number | null
-          avatar_url: string | null
-          best_answers_count: number | null
-          display_name: string | null
-          expert_categories: string[] | null
-          expert_since: string | null
-          id: string | null
-          points: number | null
-          username: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      refresh_experts_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       set_expert_status: {
         Args: { user_id: string; is_expert: boolean; categories?: string[] }
         Returns: undefined

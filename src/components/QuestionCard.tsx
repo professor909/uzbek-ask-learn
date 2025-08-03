@@ -1,8 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Heart, MessageCircle, Star, Award } from "lucide-react";
+import { Heart, MessageCircle, Star, Award, MoreHorizontal, Trash2, UserX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useAdminActions } from "@/hooks/useAdminActions";
+import { useState, useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface QuestionCardProps {
   id: string;
@@ -18,7 +27,9 @@ interface QuestionCardProps {
   timeAgo: string;
   isBestAnswer?: boolean;
   userVote?: number | null;
+  authorId: string;
   onVote: (questionId: string, voteType: 1 | -1) => void;
+  onDeleted?: () => void;
 }
 
 const QuestionCard = ({
@@ -35,12 +46,51 @@ const QuestionCard = ({
   timeAgo,
   isBestAnswer = false,
   userVote,
-  onVote
+  authorId,
+  onVote,
+  onDeleted
 }: QuestionCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { deleteQuestion, blockUser } = useAdminActions();
+  const [currentUserRole, setCurrentUserRole] = useState<string>('');
   
   const handleVote = (voteType: 1 | -1) => {
     onVote(id, voteType);
+  };
+
+  useEffect(() => {
+    // Check current user's role for admin/expert actions
+    if (user) {
+      import('@/integrations/supabase/client').then(({ supabase }) => {
+        supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setCurrentUserRole(data.role || '');
+          });
+      });
+    }
+  }, [user]);
+
+  const canManage = user && (
+    user.id === authorId || 
+    currentUserRole === 'admin' || 
+    currentUserRole === 'expert'
+  );
+
+  const handleDelete = async () => {
+    if (await deleteQuestion(id)) {
+      onDeleted?.();
+    }
+  };
+
+  const handleBlockUser = async () => {
+    if (await blockUser(authorId)) {
+      // User blocked successfully
+    }
   };
   return (
     <Card className="group hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-card/50 border-border/50 hover:border-primary/20 animate-fade-in">
@@ -71,9 +121,32 @@ const QuestionCard = ({
               {title}
             </h3>
           </div>
-          {isBestAnswer && (
-            <Star className="w-5 h-5 text-accent-warm fill-accent-warm" />
-          )}
+          <div className="flex items-center space-x-2">
+            {isBestAnswer && (
+              <Star className="w-5 h-5 text-accent-warm fill-accent-warm" />
+            )}
+            {canManage && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Удалить вопрос
+                  </DropdownMenuItem>
+                  {currentUserRole === 'admin' && user?.id !== authorId && (
+                    <DropdownMenuItem onClick={handleBlockUser} className="text-destructive">
+                      <UserX className="mr-2 h-4 w-4" />
+                      Заблокировать автора
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </CardHeader>
       

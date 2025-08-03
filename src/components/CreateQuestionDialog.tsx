@@ -120,7 +120,7 @@ const CreateQuestionDialog = () => {
       }
     }}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" className="font-medium">
+        <Button variant="secondary" size="sm" className="font-medium w-full justify-start">
           <Plus className="w-4 h-4 mr-2" />
           {t('questions.askQuestion')}
         </Button>

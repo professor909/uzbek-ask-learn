@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, Users, Award, TrendingUp, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 
 const HeroSection = () => {
@@ -13,13 +14,51 @@ const HeroSection = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [animateStats, setAnimateStats] = useState(false);
+  const [stats, setStats] = useState([
+    { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: "0", color: "text-primary" },
+    { icon: Users, labelKey: "hero.stats.participants", value: "0", color: "text-accent-warm" },
+    { icon: Award, labelKey: "hero.stats.experts", value: "0", color: "text-expert" },
+    { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: "0", color: "text-success" },
+  ]);
 
-  const stats = [
-    { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: "1,247", color: "text-primary" },
-    { icon: Users, labelKey: "hero.stats.participants", value: "3,891", color: "text-accent-warm" },
-    { icon: Award, labelKey: "hero.stats.experts", value: "127", color: "text-expert" },
-    { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: "892", color: "text-success" },
-  ];
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch questions count
+        const { count: questionsCount } = await supabase
+          .from('questions')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch users count
+        const { count: usersCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch experts count
+        const { count: expertsCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_expert', true);
+
+        // Fetch solved questions count
+        const { count: solvedCount } = await supabase
+          .from('questions')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_solved', true);
+
+        setStats([
+          { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: questionsCount?.toString() || "0", color: "text-primary" },
+          { icon: Users, labelKey: "hero.stats.participants", value: usersCount?.toString() || "0", color: "text-accent-warm" },
+          { icon: Award, labelKey: "hero.stats.experts", value: expertsCount?.toString() || "0", color: "text-expert" },
+          { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: solvedCount?.toString() || "0", color: "text-success" },
+        ]);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <div className="relative overflow-hidden bg-gradient-hero rounded-2xl p-8 lg:p-12 mb-8">

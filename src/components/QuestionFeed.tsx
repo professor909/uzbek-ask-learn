@@ -21,7 +21,7 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 const QuestionFeed = () => {
-  const { questions, loading, voteOnQuestion } = useQuestions();
+  const { questions, loading, voteOnQuestion, refetch } = useQuestions();
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -30,8 +30,9 @@ const QuestionFeed = () => {
   // Filter and sort questions
   const filteredQuestions = useMemo(() => {
     let filtered = questions.filter(question => {
-      const matchesSearch = question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           question.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = searchQuery.trim() === "" || 
+        question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        question.content.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "all" || question.category === selectedCategory;
       const matchesLanguage = question.language === language;
       return matchesSearch && matchesCategory && matchesLanguage;
@@ -58,7 +59,7 @@ const QuestionFeed = () => {
     }
 
     return filtered;
-  }, [questions, searchQuery, selectedCategory, sortBy]);
+  }, [questions, searchQuery, selectedCategory, sortBy, language]);
 
   return (
     <main className="flex-1">
@@ -129,7 +130,9 @@ const QuestionFeed = () => {
                   timeAgo={formatTimeAgo(question.created_at)}
                   isBestAnswer={question.is_solved}
                   userVote={question.user_vote}
+                  authorId={question.user_id}
                   onVote={voteOnQuestion}
+                  onDeleted={refetch}
                 />
               ))}
             </div>

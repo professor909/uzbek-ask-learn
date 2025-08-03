@@ -170,15 +170,12 @@ const Auth = () => {
 
         <Card className="shadow-elevated border-0 bg-card/95 backdrop-blur-sm animate-scale-in">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-white">
                 Вход
               </TabsTrigger>
               <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-white">
                 Регистрация
-              </TabsTrigger>
-              <TabsTrigger value="reset" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                Восстановить
               </TabsTrigger>
             </TabsList>
 
@@ -234,6 +231,23 @@ const Auth = () => {
                     {loading ? "Вход..." : "Войти"}
                   </Button>
                 </form>
+                <div className="mt-4 text-center">
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      // Show reset password form
+                      const resetForm = document.getElementById('reset-password-form');
+                      const currentContent = document.querySelector('[value="signin"]')?.closest('.w-full')?.querySelector('.space-y-4');
+                      if (resetForm && currentContent) {
+                        currentContent.classList.add('hidden');
+                        resetForm.classList.remove('hidden');
+                      }
+                    }}
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    Забыли пароль?
+                  </Button>
+                </div>
               </CardContent>
             </TabsContent>
             
@@ -318,8 +332,8 @@ const Auth = () => {
               </CardContent>
             </TabsContent>
 
-            {/* Reset Password Tab */}
-            <TabsContent value="reset">
+            {/* Hidden Reset Password Content */}
+            <div className="hidden" id="reset-password-form">
               <CardHeader className="text-center pb-4">
                 <div className="w-12 h-12 bg-accent-warm/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <KeyRound className="w-6 h-6 text-accent-warm" />
@@ -359,6 +373,22 @@ const Auth = () => {
                     >
                       {loading ? "Отправка..." : "Отправить инструкции"}
                     </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const resetForm = document.getElementById('reset-password-form');
+                        const cardContent = resetForm?.closest('.card')?.querySelector('.space-y-4');
+                        if (resetForm && cardContent) {
+                          resetForm.classList.add('hidden');
+                          cardContent.classList.remove('hidden');
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      Назад к входу
+                    </Button>
                   </form>
                 ) : (
                   <div className="text-center space-y-4">
@@ -380,9 +410,29 @@ const Auth = () => {
                     >
                       Отправить ещё раз
                     </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const resetForm = document.getElementById('reset-password-form');
+                        const cardContent = resetForm?.closest('.card')?.querySelector('.space-y-4');
+                        if (resetForm && cardContent) {
+                          resetForm.classList.add('hidden');
+                          cardContent.classList.remove('hidden');
+                        }
+                        setResetSent(false);
+                        setResetEmail("");
+                      }}
+                      className="w-full"
+                    >
+                      Назад к входу
+                    </Button>
                   </div>
                 )}
               </CardContent>
+            </div>
+
+            <TabsContent value="reset" className="hidden">
+              {/* This tab content is now handled by the hidden form above */}
             </TabsContent>
           </Tabs>
         </Card>

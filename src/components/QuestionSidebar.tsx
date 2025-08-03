@@ -1,35 +1,114 @@
+import { useState, useEffect } from "react";
 import { TrendingUp, Users, Hash, Star, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuestionSidebarProps {
   questionsCount: number;
   onCategoryClick?: (category: string) => void;
 }
 
-const getCategoriesData = (t: (key: string) => string) => [
-  { key: "math", name: t("category.math"), count: 45, color: "hsl(217, 91%, 60%)", bgColor: "hsl(217, 91%, 95%)" },
-  { key: "physics", name: t("category.physics"), count: 32, color: "hsl(142, 76%, 36%)", bgColor: "hsl(142, 76%, 95%)" },
-  { key: "informatics", name: t("category.informatics"), count: 28, color: "hsl(271, 91%, 65%)", bgColor: "hsl(271, 91%, 95%)" },
-  { key: "chemistry", name: t("category.chemistry"), count: 24, color: "hsl(0, 84%, 60%)", bgColor: "hsl(0, 84%, 95%)" },
-  { key: "biology", name: t("category.biology"), count: 19, color: "hsl(48, 96%, 53%)", bgColor: "hsl(48, 96%, 95%)" },
-  { key: "literature", name: t("category.literature"), count: 15, color: "hsl(25, 95%, 53%)", bgColor: "hsl(25, 95%, 95%)" },
-];
+interface CategoryData {
+  key: string;
+  name: string;
+  count: number;
+  color: string;
+  bgColor: string;
+}
 
-const topUsers = [
-  { name: "Алексей К.", points: 2450, answers: 89, rank: "Гуру" },
-  { name: "Мария В.", points: 1950, answers: 67, rank: "Мастер" },
-  { name: "Дмитрий С.", points: 1720, answers: 54, rank: "Знаток" },
-  { name: "Анна М.", points: 1500, answers: 45, rank: "Ученик" },
-  { name: "Игорь Л.", points: 1280, answers: 38, rank: "Новичок" },
+interface TopUser {
+  name: string;
+  points: number;
+  answers: number;
+  rank: string;
+}
+
+const getCategoriesData = (t: (key: string) => string): CategoryData[] => [
+  { key: "math", name: t("category.math"), count: 0, color: "hsl(217, 91%, 60%)", bgColor: "hsl(217, 91%, 95%)" },
+  { key: "physics", name: t("category.physics"), count: 0, color: "hsl(142, 76%, 36%)", bgColor: "hsl(142, 76%, 95%)" },
+  { key: "informatics", name: t("category.informatics"), count: 0, color: "hsl(271, 91%, 65%)", bgColor: "hsl(271, 91%, 95%)" },
+  { key: "chemistry", name: t("category.chemistry"), count: 0, color: "hsl(0, 84%, 60%)", bgColor: "hsl(0, 84%, 95%)" },
+  { key: "biology", name: t("category.biology"), count: 0, color: "hsl(48, 96%, 53%)", bgColor: "hsl(48, 96%, 95%)" },
+  { key: "literature", name: t("category.literature"), count: 0, color: "hsl(25, 95%, 53%)", bgColor: "hsl(25, 95%, 95%)" },
 ];
 
 const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarProps) => {
   const { t } = useLanguage();
-  const categories = getCategoriesData(t);
+  const [categories, setCategories] = useState<CategoryData[]>(getCategoriesData(t));
+  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
+  const [activeUsersCount, setActiveUsersCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCategoryCounts = async () => {
+      try {
+        const categoriesData = getCategoriesData(t);
+        const categoriesWithCounts = await Promise.all(
+          categoriesData.map(async (category) => {
+            const { count } = await supabase
+              .from('questions')
+              .select('*', { count: 'exact', head: true })
+              .eq('category', category.key);
+            
+            return { ...category, count: count || 0 };
+          })
+        );
+        setCategories(categoriesWithCounts);
+      } catch (error) {
+        console.error('Error fetching category counts:', error);
+      }
+    };
+
+    const fetchTopUsers = async () => {
+      try {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, username, points, role')
+          .order('points', { ascending: false })
+          .limit(5);
+
+        if (profiles) {
+          const usersWithAnswers = await Promise.all(
+            profiles.map(async (profile) => {
+              const { count: answersCount } = await supabase
+                .from('answers')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', profile.id);
+
+              return {
+                name: profile.display_name || profile.username || 'Пользователь',
+                points: profile.points || 0,
+                answers: answersCount || 0,
+                rank: profile.role || 'novice'
+              };
+            })
+          );
+          setTopUsers(usersWithAnswers);
+        }
+      } catch (error) {
+        console.error('Error fetching top users:', error);
+      }
+    };
+
+    const fetchActiveUsersCount = async () => {
+      try {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        setActiveUsersCount(count || 0);
+      } catch (error) {
+        console.error('Error fetching active users count:', error);
+      }
+    };
+
+    fetchCategoryCounts();
+    fetchTopUsers();
+    fetchActiveUsersCount();
+  }, [t]);
   
   return (
     <aside className="w-full lg:w-80 space-y-6">
@@ -54,7 +133,7 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
               <Users className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">{t("sidebar.activeUsers")}</span>
             </div>
-            <span className="font-semibold">247</span>
+            <span className="font-semibold">{activeUsersCount}</span>
           </div>
         </CardContent>
       </Card>
@@ -102,7 +181,12 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {topUsers.map((user, index) => (
+          {topUsers.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              {t("sidebar.noUsers")}
+            </p>
+          ) : (
+            topUsers.map((user, index) => (
             <div key={user.name} className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 min-w-0 flex-1">
                 <div className="relative">
@@ -132,7 +216,8 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
                 {user.rank}
               </Badge>
             </div>
-          ))}
+            ))
+          )}
         </CardContent>
       </Card>
     </aside>

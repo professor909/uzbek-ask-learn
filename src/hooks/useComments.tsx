@@ -33,7 +33,7 @@ export const useComments = (answerId: string) => {
         .from('comments')
         .select(`
           *,
-          profiles (
+          profiles!fk_comments_user_id (
             username,
             display_name,
             role

@@ -96,6 +96,7 @@ const translations = {
     'sidebar.answers': 'ответов',
     'sidebar.categories': 'Категории',
     'sidebar.quickStats': 'Ответов',
+    'sidebar.noUsers': 'Пока нет пользователей',
     
     // Answer Form
     'answer.placeholder': 'Напишите ваш ответ...',
@@ -340,6 +341,7 @@ const translations = {
     'sidebar.answers': 'javob',
     'sidebar.categories': 'Kategoriyalar',
     'sidebar.quickStats': 'Javoblar',
+    'sidebar.noUsers': 'Hozircha foydalanuvchilar yo\'q',
     
     // Answer Form
     'answer.placeholder': 'Javobingizni yozing...',

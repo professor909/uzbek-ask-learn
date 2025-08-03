@@ -1,4 +1,4 @@
-import { Search, Bell, User, Skull, LogOut, Globe } from "lucide-react";
+import { Search, Bell, User, Skull, LogOut, Globe, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -68,11 +68,8 @@ const Header = () => {
               <>
                 <CreateQuestionDialog />
                 
-                <Button variant="ghost" size="sm" className="relative">
+                <Button variant="ghost" size="sm" className="relative opacity-50 cursor-not-allowed">
                   <Bell className="w-4 h-4" />
-                  <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-accent-warm text-accent-warm-foreground text-xs flex items-center justify-center">
-                    3
-                  </Badge>
                 </Button>
                 
                 <DropdownMenu>
@@ -80,12 +77,16 @@ const Header = () => {
                     <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                       <User className="w-4 h-4" />
                       <div className="flex flex-col items-start">
-                        <span className="text-xs text-muted-foreground">125 {t('header.points')}</span>
-                        <span className="text-sm font-medium">{t('header.student')}</span>
+                      <span className="text-xs text-muted-foreground">0 {t('header.points')}</span>
+                        <span className="text-sm font-medium">{t('profile.reputation.novice')}</span>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Профиль
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('header.logout')}

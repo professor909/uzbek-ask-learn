@@ -2,16 +2,17 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Smartphone, Tablet } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const { t } = useLanguage();
 
   const footerLinks = [
-    { key: 'terms', href: '#' },
-    { key: 'copyright', href: '#' },
-    { key: 'privacy', href: '#' },
-    { key: 'careers', href: '#' },
-    { key: 'about', href: '#' }
+    { key: 'terms', href: '/terms' },
+    { key: 'copyright', href: '/copyright' },
+    { key: 'privacy', href: '/privacy' },
+    { key: 'careers', href: '/careers' },
+    { key: 'about', href: '/about' }
   ];
 
   return (
@@ -24,8 +25,10 @@ const Footer = () => {
             <nav className="space-y-2">
               {footerLinks.map((link) => (
                 <div key={link.key}>
-                  <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-foreground text-sm">
-                    {t(`footer.${link.key}`)}
+                  <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-foreground text-sm" asChild>
+                    <Link to={link.href}>
+                      {t(`footer.${link.key}`)}
+                    </Link>
                   </Button>
                 </div>
               ))}

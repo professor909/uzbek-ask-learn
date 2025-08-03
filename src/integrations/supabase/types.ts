@@ -92,6 +92,13 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -103,7 +110,10 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          expert_categories: string[] | null
+          expert_since: string | null
           id: string
+          is_expert: boolean | null
           points: number | null
           reputation_level: string | null
           role: string | null
@@ -115,7 +125,10 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          expert_categories?: string[] | null
+          expert_since?: string | null
           id: string
+          is_expert?: boolean | null
           points?: number | null
           reputation_level?: string | null
           role?: string | null
@@ -127,7 +140,10 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          expert_categories?: string[] | null
+          expert_since?: string | null
           id?: string
+          is_expert?: boolean | null
           points?: number | null
           reputation_level?: string | null
           role?: string | null
@@ -222,10 +238,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      experts: {
+        Row: {
+          answers_count: number | null
+          avatar_url: string | null
+          best_answers_count: number | null
+          display_name: string | null
+          expert_categories: string[] | null
+          expert_since: string | null
+          id: string | null
+          points: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      set_expert_status: {
+        Args: { user_id: string; is_expert: boolean; categories?: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

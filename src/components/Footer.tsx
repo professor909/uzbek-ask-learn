@@ -34,13 +34,13 @@ const Footer = () => {
 
           {/* App Downloads */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Мобильные приложения</h3>
+            <h3 className="font-semibold text-lg mb-4">{t('footer.mobileApps')}</h3>
             <div className="space-y-3">
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href="#" className="flex items-center">
                   <Smartphone className="w-5 h-5 mr-3" />
                   <div className="text-left">
-                    <div className="text-sm font-medium">Скачать в</div>
+                    <div className="text-sm font-medium">{t('footer.downloadOn')}</div>
                     <div className="text-xs text-muted-foreground">Google Play</div>
                   </div>
                 </a>
@@ -49,7 +49,7 @@ const Footer = () => {
                 <a href="#" className="flex items-center">
                   <Tablet className="w-5 h-5 mr-3" />
                   <div className="text-left">
-                    <div className="text-sm font-medium">Скачать в</div>
+                    <div className="text-sm font-medium">{t('footer.downloadOn')}</div>
                     <div className="text-xs text-muted-foreground">App Store</div>
                   </div>
                 </a>
@@ -59,7 +59,7 @@ const Footer = () => {
 
           {/* Mission Statement */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Наша миссия</h3>
+            <h3 className="font-semibold text-lg mb-4">{t('footer.ourMission')}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t('footer.slogan')}
             </p>
@@ -70,10 +70,10 @@ const Footer = () => {
         
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <p className="text-sm text-muted-foreground">
-            © 2024 ForSkull. Все права защищены.
+            © 2024 ForSkull. {t('footer.allRightsReserved')}
           </p>
           <p className="text-xs text-muted-foreground">
-            Образовательная платформа для студентов
+            {t('footer.educationalPlatform')}
           </p>
         </div>
       </div>

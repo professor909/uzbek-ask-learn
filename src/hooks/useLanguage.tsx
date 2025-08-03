@@ -132,6 +132,11 @@ const translations = {
     'footer.privacy': 'Политика конфиденциальности',
     'footer.careers': 'Вакансии',
     'footer.about': 'О нас',
+    'footer.mobileApps': 'Мобильные приложения',
+    'footer.downloadOn': 'Скачать в',
+    'footer.ourMission': 'Наша миссия',
+    'footer.allRightsReserved': 'Все права защищены',
+    'footer.educationalPlatform': 'Образовательная платформа для студентов',
     'footer.slogan': 'Образование — это самое мощное оружие, которое можно использовать, чтобы изменить мир',
 
     // Common
@@ -264,6 +269,11 @@ const translations = {
     'footer.privacy': 'Maxfiylik siyosati',
     'footer.careers': 'Ish o\'rinlari',
     'footer.about': 'Biz haqimizda',
+    'footer.mobileApps': 'Mobil ilovalar',
+    'footer.downloadOn': 'Yuklab olish',
+    'footer.ourMission': 'Bizning missiyamiz',
+    'footer.allRightsReserved': 'Barcha huquqlar himoyalangan',
+    'footer.educationalPlatform': 'Talabalar uchun ta\'lim platformasi',
     'footer.slogan': 'Ta\'lim - dunyoni o\'zgartirish uchun ishlatilishi mumkin bo\'lgan eng kuchli quroldir',
 
     // Common

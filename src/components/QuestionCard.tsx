@@ -163,8 +163,7 @@ const QuestionCard = ({
             <img 
               src={imageUrl} 
               alt="Question image" 
-              className="max-w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(imageUrl, '_blank')}
+              className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
             />
           </div>
         )}

@@ -218,8 +218,7 @@ const QuestionDetail = () => {
                   <img 
                     src={question.image_url} 
                     alt="Question image" 
-                    className="max-w-full h-auto rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => window.open(question.image_url, '_blank')}
+                    className="max-w-full h-auto max-h-96 object-contain rounded-lg border"
                   />
                 </div>
               )}
@@ -282,8 +281,7 @@ const QuestionDetail = () => {
                               <img 
                                 src={answer.image_url} 
                                 alt="Answer image" 
-                                className="max-w-full h-auto rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => window.open(answer.image_url, '_blank')}
+                                className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
                               />
                             </div>
                           )}

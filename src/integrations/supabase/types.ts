@@ -19,6 +19,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_best_answer: boolean | null
           language: string
           question_id: string
@@ -29,6 +30,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_best_answer?: boolean | null
           language?: string
           question_id: string
@@ -39,6 +41,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_best_answer?: boolean | null
           language?: string
           question_id?: string
@@ -260,6 +263,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_expert: boolean | null
           is_solved: boolean | null
           language: string
@@ -273,6 +277,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_expert?: boolean | null
           is_solved?: boolean | null
           language?: string
@@ -286,6 +291,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_expert?: boolean | null
           is_solved?: boolean | null
           language?: string

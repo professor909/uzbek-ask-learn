@@ -27,15 +27,41 @@ const Header = () => {
 
   useEffect(() => {
     if (user) {
+      const fetchUserProfile = () => {
+        import('@/integrations/supabase/client').then(({ supabase }) => {
+          supabase
+            .from('profiles')
+            .select('display_name, username, avatar_url, points, role')
+            .eq('id', user.id)
+            .single()
+            .then(({ data }) => {
+              if (data) setUserProfile(data);
+            });
+        });
+      };
+
+      fetchUserProfile();
+      
+      // Set up real-time subscription for profile updates
       import('@/integrations/supabase/client').then(({ supabase }) => {
-        supabase
-          .from('profiles')
-          .select('display_name, username, avatar_url')
-          .eq('id', user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) setUserProfile(data);
-          });
+        const subscription = supabase
+          .channel('profile_changes')
+          .on('postgres_changes', 
+            { 
+              event: 'UPDATE', 
+              schema: 'public', 
+              table: 'profiles',
+              filter: `id=eq.${user.id}`
+            }, 
+            () => {
+              fetchUserProfile();
+            }
+          )
+          .subscribe();
+
+        return () => {
+          subscription.unsubscribe();
+        };
       });
     }
   }, [user]);
@@ -149,12 +175,12 @@ const Header = () => {
                         username={userProfile?.username}
                         size="sm"
                       />
-                      {!isMobile && (
+                       {!isMobile && (
                         <div className="flex flex-col items-start">
-                          <span className="text-xs text-muted-foreground">0 {t('header.points')}</span>
-                          <span className="text-sm font-medium">{t('profile.reputation.novice')}</span>
+                          <span className="text-xs text-muted-foreground">{userProfile?.points || 0} {t('header.points')}</span>
+                          <span className="text-sm font-medium">{userProfile?.role || 'novice'}</span>
                         </div>
-                      )}
+                       )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

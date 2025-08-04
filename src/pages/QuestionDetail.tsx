@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, ThumbsUp, Trophy, Clock, User } from "lucide-react";
+import { ArrowLeft, MessageSquare, ThumbsUp, Trophy, Clock, User, MoreHorizontal, Trash2, UserX } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAnswers } from "@/hooks/useAnswers";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminActions } from "@/hooks/useAdminActions";
 import Header from "@/components/Header";
 import { ImageUpload } from "@/components/ImageUpload";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ImageZoomModal } from "@/components/ImageZoomModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // SEO Hook for updating page metadata
 const useSEO = (title: string, description: string, url: string) => {
@@ -97,12 +104,30 @@ const QuestionDetail = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { questions, voteOnQuestion } = useQuestions();
-  const { answers, loading: answersLoading, createAnswer, voteOnAnswer } = useAnswers(id || '');
+  const { answers, loading: answersLoading, createAnswer, voteOnAnswer, refetch: refetchAnswers } = useAnswers(id || '');
+  const { deleteAnswer, blockUser } = useAdminActions();
   const [newAnswer, setNewAnswer] = useState("");
   const [answerImage, setAnswerImage] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<string>('');
 
   const question = questions.find(q => q.id === id);
+
+  // Check current user's role for admin/expert actions
+  useEffect(() => {
+    if (user) {
+      import('@/integrations/supabase/client').then(({ supabase }) => {
+        supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setCurrentUserRole(data.role || '');
+          });
+      });
+    }
+  }, [user]);
 
   // SEO optimization
   const questionTitle = question?.title || 'Вопрос не найден';
@@ -146,6 +171,26 @@ const QuestionDetail = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteAnswer = async (answerId: string) => {
+    if (await deleteAnswer(answerId, id || '')) {
+      refetchAnswers();
+    }
+  };
+
+  const handleBlockUser = async (userId: string) => {
+    if (await blockUser(userId)) {
+      // User blocked successfully
+    }
+  };
+
+  const canManageAnswer = (answer: any) => {
+    return user && (
+      user.id === answer.user_id || 
+      currentUserRole === 'admin' || 
+      currentUserRole === 'expert'
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -280,36 +325,59 @@ const QuestionDetail = () => {
                             <Trophy className="w-3 h-3 mr-1" />
                             Лучший
                           </Badge>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="prose prose-gray max-w-none mb-4">
-                          <p className="text-foreground whitespace-pre-wrap">{answer.content}</p>
-                          {answer.image_url && (
-                            <div className="mt-3">
-                              <ImageZoomModal imageUrl={answer.image_url} alt="Answer image">
-                                <img 
-                                  src={answer.image_url} 
-                                  alt="Answer image" 
-                                  className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
-                                />
-                              </ImageZoomModal>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                          <UserAvatar 
-                            avatarUrl={answer.profiles?.avatar_url}
-                            displayName={answer.profiles?.display_name}
-                            username={answer.profiles?.username}
-                            size="sm"
-                          />
-                          <span>{answer.profiles?.display_name || answer.profiles?.username || 'Аноним'}</span>
-                          <span className="mx-2">•</span>
-                          <Clock className="w-4 h-4 mr-1" />
-                          {formatDate(answer.created_at)}
-                        </div>
-                      </div>
+                         )}
+                       </div>
+                       <div className="flex-1">
+                         <div className="prose prose-gray max-w-none mb-4">
+                            <p className="text-foreground whitespace-pre-wrap">{answer.content}</p>
+                            {answer.image_url && (
+                              <div className="mt-3">
+                                <ImageZoomModal imageUrl={answer.image_url} alt="Answer image">
+                                  <img 
+                                    src={answer.image_url} 
+                                    alt="Answer image" 
+                                    className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
+                                  />
+                                </ImageZoomModal>
+                              </div>
+                            )}
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                             <UserAvatar 
+                               avatarUrl={answer.profiles?.avatar_url}
+                               displayName={answer.profiles?.display_name}
+                               username={answer.profiles?.username}
+                               size="sm"
+                             />
+                             <span>{answer.profiles?.display_name || answer.profiles?.username || 'Аноним'}</span>
+                             <span className="mx-2">•</span>
+                             <Clock className="w-4 h-4 mr-1" />
+                             {formatDate(answer.created_at)}
+                           </div>
+                           {canManageAnswer(answer) && (
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                   <MoreHorizontal className="h-4 w-4" />
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent align="end">
+                                 <DropdownMenuItem onClick={() => handleDeleteAnswer(answer.id)} className="text-destructive">
+                                   <Trash2 className="mr-2 h-4 w-4" />
+                                   Удалить ответ
+                                 </DropdownMenuItem>
+                                 {currentUserRole === 'admin' && user?.id !== answer.user_id && (
+                                   <DropdownMenuItem onClick={() => handleBlockUser(answer.user_id)} className="text-destructive">
+                                     <UserX className="mr-2 h-4 w-4" />
+                                     Заблокировать автора
+                                   </DropdownMenuItem>
+                                 )}
+                               </DropdownMenuContent>
+                             </DropdownMenu>
+                           )}
+                         </div>
+                       </div>
                     </div>
                   </CardContent>
                 </Card>

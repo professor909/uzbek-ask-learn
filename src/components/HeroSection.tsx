@@ -8,6 +8,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import CreateQuestionDialog from "./CreateQuestionDialog";
+import { UserAvatar } from "./UserAvatar";
 
 const HeroSection = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const HeroSection = () => {
     { icon: Award, labelKey: "hero.stats.experts", value: "0", color: "text-expert" },
     { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: "0", color: "text-success" },
   ]);
+  const [topUsers, setTopUsers] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -52,6 +54,15 @@ const HeroSection = () => {
           { icon: Award, labelKey: "hero.stats.experts", value: expertsCount?.toString() || "0", color: "text-expert" },
           { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: solvedCount?.toString() || "0", color: "text-success" },
         ]);
+
+        // Fetch top users of the month
+        const { data: topUsersData } = await supabase
+          .from('profiles')
+          .select('id, username, display_name, avatar_url, points, role')
+          .order('points', { ascending: false })
+          .limit(5);
+
+        setTopUsers(topUsersData || []);
       } catch (error) {
         console.error('Error fetching stats:', error);
       }
@@ -140,6 +151,40 @@ const HeroSection = () => {
             })}
           </div>
         </div>
+        
+        {/* Top Users Section */}
+        {topUsers.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-white/20">
+            <h3 className="text-xl font-semibold text-white mb-6 text-center">Топ участники месяца</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {topUsers.map((user, index) => (
+                <Card key={user.id} className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300">
+                  <CardContent className="p-4 text-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <UserAvatar 
+                        avatarUrl={user.avatar_url}
+                        displayName={user.display_name}
+                        username={user.username}
+                        size="md"
+                      />
+                      <div>
+                        <div className="text-sm font-medium text-white">
+                          {user.display_name || user.username || 'Аноним'}
+                        </div>
+                        <div className="text-xs text-white/70">
+                          {user.points} баллов
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-white/10 border-white/20 text-white">
+                          {user.role || 'novice'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Quick Actions */}
         <div className="mt-12 pt-8 border-t border-white/20">

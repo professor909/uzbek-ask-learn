@@ -164,13 +164,14 @@ const QuestionCard = ({
         </p>
         {imageUrl && (
           <div className="mt-3">
-            <ImageZoomModal imageUrl={imageUrl} alt="Question image">
-              <img 
-                src={imageUrl} 
-                alt="Question image" 
-                className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
-              />
-            </ImageZoomModal>
+            <img 
+              src={imageUrl} 
+              alt="Question image" 
+              className="max-w-full h-auto max-h-64 object-contain rounded-lg border pointer-events-none"
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
+              draggable={false}
+            />
           </div>
         )}
       </CardContent>

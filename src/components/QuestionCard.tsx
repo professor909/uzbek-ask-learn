@@ -175,7 +175,14 @@ const QuestionCard = ({
           </div>
           
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-            <span className="font-medium">{authorName}</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-primary-foreground">
+                  {authorName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span className="font-medium">{authorName}</span>
+            </div>
             <Badge variant="outline" className="text-xs">
               {authorRank}
             </Badge>

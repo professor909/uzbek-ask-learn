@@ -75,14 +75,25 @@ const QuestionFeed = () => {
             </div>
           </div>
 
-          <SearchAndFilter
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-          />
+        <SearchAndFilter
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedCategory={selectedCategory}
+          onCategoryChange={(category) => {
+            setSelectedCategory(category);
+            // Scroll to questions on mobile when category is selected
+            if (window.innerWidth < 768 && category) {
+              setTimeout(() => {
+                const questionsSection = document.getElementById('questions-section');
+                if (questionsSection) {
+                  questionsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }
+          }}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
 
           {loading ? (
             <div className="space-y-4">

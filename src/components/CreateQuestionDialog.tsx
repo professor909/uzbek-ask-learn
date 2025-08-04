@@ -70,6 +70,16 @@ const CreateQuestionDialog = () => {
       return;
     }
 
+    if (title.trim().length < 20) {
+      alert("Заголовок должен содержать минимум 20 символов");
+      return;
+    }
+
+    if (content.trim().length < 50) {
+      alert("Описание должно содержать минимум 50 символов");
+      return;
+    }
+
     setLoading(true);
     try {
       const questionData = {
@@ -125,7 +135,7 @@ const CreateQuestionDialog = () => {
           {t('questions.askQuestion')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[95vw] sm:w-full">
         <DialogHeader>
           <DialogTitle>{t('questions.createQuestion')}</DialogTitle>
           <DialogDescription>

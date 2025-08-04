@@ -237,9 +237,9 @@ const Auth = () => {
                     onClick={() => {
                       // Show reset password form
                       const resetForm = document.getElementById('reset-password-form');
-                      const currentContent = document.querySelector('[value="signin"]')?.closest('.w-full')?.querySelector('.space-y-4');
+                      const currentContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
                       if (resetForm && currentContent) {
-                        currentContent.classList.add('hidden');
+                        currentContent.style.display = 'none';
                         resetForm.classList.remove('hidden');
                       }
                     }}
@@ -379,10 +379,10 @@ const Auth = () => {
                       variant="outline"
                       onClick={() => {
                         const resetForm = document.getElementById('reset-password-form');
-                        const cardContent = resetForm?.closest('.card')?.querySelector('.space-y-4');
-                        if (resetForm && cardContent) {
+                        const signinContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
+                        if (resetForm && signinContent) {
                           resetForm.classList.add('hidden');
-                          cardContent.classList.remove('hidden');
+                          signinContent.style.display = 'block';
                         }
                       }}
                       className="w-full"
@@ -414,10 +414,10 @@ const Auth = () => {
                       variant="ghost"
                       onClick={() => {
                         const resetForm = document.getElementById('reset-password-form');
-                        const cardContent = resetForm?.closest('.card')?.querySelector('.space-y-4');
-                        if (resetForm && cardContent) {
+                        const signinContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
+                        if (resetForm && signinContent) {
                           resetForm.classList.add('hidden');
-                          cardContent.classList.remove('hidden');
+                          signinContent.style.display = 'block';
                         }
                         setResetSent(false);
                         setResetEmail("");

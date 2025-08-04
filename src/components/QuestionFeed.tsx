@@ -124,7 +124,7 @@ const QuestionFeed = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-6">
+            <div id="questions-section" className="space-y-6">
               {filteredQuestions.map((question) => (
                 <QuestionCard 
                   key={question.id} 

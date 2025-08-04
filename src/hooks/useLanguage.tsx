@@ -45,10 +45,20 @@ const translations = {
     'questions.sortNewest': 'Новые',
     'questions.sortOldest': 'Старые',
     'questions.sortMostLiked': 'Популярные',
+    'questions.sortPointsHigh': 'Баллы (больше)',
+    'questions.sortPointsLow': 'Баллы (меньше)',
     'questions.filterByCategory': 'Категория',
     'questions.allCategories': 'Все категории',
     'questions.noQuestions': 'Вопросы не найдены',
-    'questions.noQuestionsDesc': 'Попробуйте изменить параметры поиска или создайте первый вопрос.',
+    'questions.noQuestionsDesc': 'Попробуйте изменить фильтры или создать новый вопрос',
+
+    // Ranks
+    'rank.novice': 'Новичок',
+    'rank.student': 'Студент',
+    'rank.expert': 'Эксперт',
+    'rank.admin': 'Администратор',
+    'rank.blocked': 'Заблокирован',
+    
     'questions.loading': 'Загрузка вопросов...',
     
     // Question Form

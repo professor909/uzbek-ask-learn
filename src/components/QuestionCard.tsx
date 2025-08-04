@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Star, Award, MoreHorizontal, Trash2, UserX } from
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminActions } from "@/hooks/useAdminActions";
+import { useRankTranslation } from "@/hooks/useRankTranslation";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -53,6 +54,7 @@ const QuestionCard = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { deleteQuestion, blockUser } = useAdminActions();
+  const { translateRank, translateCategory } = useRankTranslation();
   const [currentUserRole, setCurrentUserRole] = useState<string>('');
   
   const handleVote = (voteType: 1 | -1) => {
@@ -99,7 +101,7 @@ const QuestionCard = ({
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-2">
               <Badge variant="secondary" className="text-xs">
-                {category}
+                {translateCategory(category)}
               </Badge>
               <Badge 
                 variant="outline" 
@@ -184,7 +186,7 @@ const QuestionCard = ({
               <span className="font-medium">{authorName}</span>
             </div>
             <Badge variant="outline" className="text-xs">
-              {authorRank}
+              {translateRank(authorRank)}
             </Badge>
             <span>•</span>
             <span>{timeAgo}</span>

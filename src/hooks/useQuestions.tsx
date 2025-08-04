@@ -146,14 +146,52 @@ export const useQuestions = () => {
       return;
     }
 
+    // Check if user has enough points
+    let profile: any = null;
     try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('points')
+        .eq('id', user.id)
+        .single();
+      
+      profile = profileData;
+
+      if (profile && profile.points < questionData.points) {
+        toast({
+          title: 'Недостаточно баллов',
+          description: `У вас ${profile.points} баллов, а нужно ${questionData.points}. Отвечайте на вопросы, чтобы заработать баллы!`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking user points:', error);
+    }
+
+    try {
+      // First deduct points from user
+      const { error: pointsError } = await supabase
+        .from('profiles')
+        .update({ points: profile ? profile.points - questionData.points : 0 })
+        .eq('id', user.id);
+
+      if (pointsError) throw pointsError;
+
       const { error } = await supabase.from('questions').insert({
         ...questionData,
         user_id: user.id,
         is_expert: questionData.is_expert || false,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Rollback points if question creation failed
+        await supabase
+          .from('profiles')
+          .update({ points: profile ? profile.points : 0 })
+          .eq('id', user.id);
+        throw error;
+      }
 
       toast({
         title: 'Успешно!',

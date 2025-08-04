@@ -17,6 +17,7 @@ export interface Answer {
     username: string | null;
     display_name: string | null;
     role: string | null;
+    avatar_url: string | null;
   } | null;
   likes_count?: number;
   user_vote?: number;
@@ -42,7 +43,8 @@ export const useAnswers = (questionId: string) => {
           profiles (
             username,
             display_name,
-            role
+            role,
+            avatar_url
           )
         `)
         .eq('question_id', questionId)
@@ -76,7 +78,7 @@ export const useAnswers = (questionId: string) => {
             ...answer,
             likes_count: likesCount || 0,
             user_vote: userVote,
-            profiles: answer.profiles || { username: null, display_name: null, role: null }
+            profiles: answer.profiles || { username: null, display_name: null, role: null, avatar_url: null }
           } as Answer;
         })
       );

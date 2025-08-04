@@ -1,6 +1,5 @@
-import { Search, Bell, User, Skull, LogOut, Globe, Settings, Plus } from "lucide-react";
+import { Bell, User, Skull, LogOut, Globe, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -15,6 +14,8 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 import { useNotifications } from "@/hooks/useNotifications";
+import { UserAvatar } from "./UserAvatar";
+import { useState, useEffect } from "react";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -22,6 +23,22 @@ const Header = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (user) {
+      import('@/integrations/supabase/client').then(({ supabase }) => {
+        supabase
+          .from('profiles')
+          .select('display_name, username, avatar_url')
+          .eq('id', user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setUserProfile(data);
+          });
+      });
+    }
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,16 +55,8 @@ const Header = () => {
             <span className="text-xl font-bold text-foreground">ForSkull</span>
           </Link>
 
-          {/* Search */}
-          <div className="flex-1 max-w-md mx-4 lg:mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder={t('search.placeholder')}
-                className="pl-10 bg-muted/50 border-0 focus:bg-background transition-colors text-sm"
-              />
-            </div>
-          </div>
+          {/* Spacer */}
+          <div className="flex-1"></div>
 
           {/* Actions */}
           <div className="flex items-center space-x-1 lg:space-x-2">
@@ -134,7 +143,12 @@ const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                      <User className="w-4 h-4" />
+                      <UserAvatar 
+                        avatarUrl={userProfile?.avatar_url}
+                        displayName={userProfile?.display_name}
+                        username={userProfile?.username}
+                        size="sm"
+                      />
                       {!isMobile && (
                         <div className="flex flex-col items-start">
                           <span className="text-xs text-muted-foreground">0 {t('header.points')}</span>

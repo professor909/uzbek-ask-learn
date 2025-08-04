@@ -143,6 +143,7 @@ const QuestionFeed = () => {
                   userVote={question.user_vote}
                   authorId={question.user_id}
                   imageUrl={question.image_url}
+                  authorAvatarUrl={question.profiles?.avatar_url}
                   onVote={voteOnQuestion}
                   onDeleted={refetch}
                 />

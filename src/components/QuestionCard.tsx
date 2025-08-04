@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserAvatar } from "./UserAvatar";
+import { ImageZoomModal } from "./ImageZoomModal";
 
 interface QuestionCardProps {
   id: string;
@@ -30,6 +32,7 @@ interface QuestionCardProps {
   userVote?: number | null;
   authorId: string;
   imageUrl?: string;
+  authorAvatarUrl?: string;
   onVote: (questionId: string, voteType: 1 | -1) => void;
   onDeleted?: () => void;
 }
@@ -50,6 +53,7 @@ const QuestionCard = ({
   userVote,
   authorId,
   imageUrl,
+  authorAvatarUrl,
   onVote,
   onDeleted
 }: QuestionCardProps) => {
@@ -160,11 +164,13 @@ const QuestionCard = ({
         </p>
         {imageUrl && (
           <div className="mt-3">
-            <img 
-              src={imageUrl} 
-              alt="Question image" 
-              className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
-            />
+            <ImageZoomModal imageUrl={imageUrl} alt="Question image">
+              <img 
+                src={imageUrl} 
+                alt="Question image" 
+                className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
+              />
+            </ImageZoomModal>
           </div>
         )}
       </CardContent>
@@ -189,11 +195,11 @@ const QuestionCard = ({
           
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
             <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-primary-foreground">
-                  {authorName.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              <UserAvatar 
+                avatarUrl={authorAvatarUrl}
+                displayName={authorName}
+                size="sm"
+              />
               <span className="font-medium">{authorName}</span>
             </div>
             <Badge variant="outline" className="text-xs">

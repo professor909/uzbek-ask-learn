@@ -11,6 +11,8 @@ import { useQuestions } from "@/hooks/useQuestions";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { ImageUpload } from "@/components/ImageUpload";
+import { UserAvatar } from "@/components/UserAvatar";
+import { ImageZoomModal } from "@/components/ImageZoomModal";
 
 // SEO Hook for updating page metadata
 const useSEO = (title: string, description: string, url: string) => {
@@ -176,9 +178,14 @@ const QuestionDetail = () => {
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-foreground mb-3">{question.title}</h1>
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {question.profiles?.display_name || question.profiles?.username || 'Аноним'}
+                  <div className="flex items-center space-x-2">
+                    <UserAvatar 
+                      avatarUrl={question.profiles?.avatar_url}
+                      displayName={question.profiles?.display_name}
+                      username={question.profiles?.username}
+                      size="sm"
+                    />
+                    <span>{question.profiles?.display_name || question.profiles?.username || 'Аноним'}</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-1" />
@@ -215,11 +222,13 @@ const QuestionDetail = () => {
               <p className="text-foreground whitespace-pre-wrap">{question.content}</p>
               {question.image_url && (
                 <div className="mt-4">
-                  <img 
-                    src={question.image_url} 
-                    alt="Question image" 
-                    className="max-w-full h-auto max-h-96 object-contain rounded-lg border"
-                  />
+                  <ImageZoomModal imageUrl={question.image_url} alt="Question image">
+                    <img 
+                      src={question.image_url} 
+                      alt="Question image" 
+                      className="max-w-full h-auto max-h-96 object-contain rounded-lg border"
+                    />
+                  </ImageZoomModal>
                 </div>
               )}
             </div>
@@ -278,17 +287,24 @@ const QuestionDetail = () => {
                           <p className="text-foreground whitespace-pre-wrap">{answer.content}</p>
                           {answer.image_url && (
                             <div className="mt-3">
-                              <img 
-                                src={answer.image_url} 
-                                alt="Answer image" 
-                                className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
-                              />
+                              <ImageZoomModal imageUrl={answer.image_url} alt="Answer image">
+                                <img 
+                                  src={answer.image_url} 
+                                  alt="Answer image" 
+                                  className="max-w-full h-auto max-h-64 object-contain rounded-lg border"
+                                />
+                              </ImageZoomModal>
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <User className="w-4 h-4 mr-1" />
-                          {answer.profiles?.display_name || answer.profiles?.username || 'Аноним'}
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <UserAvatar 
+                            avatarUrl={answer.profiles?.avatar_url}
+                            displayName={answer.profiles?.display_name}
+                            username={answer.profiles?.username}
+                            size="sm"
+                          />
+                          <span>{answer.profiles?.display_name || answer.profiles?.username || 'Аноним'}</span>
                           <span className="mx-2">•</span>
                           <Clock className="w-4 h-4 mr-1" />
                           {formatDate(answer.created_at)}

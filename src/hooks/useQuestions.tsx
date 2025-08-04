@@ -19,6 +19,7 @@ export interface Question {
     username: string | null;
     display_name: string | null;
     role: string | null;
+    avatar_url: string | null;
   } | null;
   answers_count?: number;
   likes_count?: number;
@@ -43,7 +44,8 @@ export const useQuestions = () => {
           profiles (
             username,
             display_name,
-            role
+            role,
+            avatar_url
           )
         `)
         .order('created_at', { ascending: false });
@@ -97,7 +99,7 @@ export const useQuestions = () => {
               answers_count: answerCount || 0,
               likes_count: likesCount || 0,
               user_vote: userVote,
-              profiles: question.profiles || { username: null, display_name: null, role: null }
+              profiles: question.profiles || { username: null, display_name: null, role: null, avatar_url: null }
             } as Question;
           } catch (error) {
             console.error('Error fetching counts for question:', question.id, error);
@@ -107,7 +109,7 @@ export const useQuestions = () => {
               answers_count: 0,
               likes_count: 0,
               user_vote: null,
-              profiles: question.profiles || { username: null, display_name: null, role: null }
+              profiles: question.profiles || { username: null, display_name: null, role: null, avatar_url: null }
             } as Question;
           }
         })

@@ -29,6 +29,7 @@ interface QuestionCardProps {
   isBestAnswer?: boolean;
   userVote?: number | null;
   authorId: string;
+  imageUrl?: string;
   onVote: (questionId: string, voteType: 1 | -1) => void;
   onDeleted?: () => void;
 }
@@ -48,6 +49,7 @@ const QuestionCard = ({
   isBestAnswer = false,
   userVote,
   authorId,
+  imageUrl,
   onVote,
   onDeleted
 }: QuestionCardProps) => {
@@ -156,6 +158,16 @@ const QuestionCard = ({
         <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
           {content}
         </p>
+        {imageUrl && (
+          <div className="mt-3">
+            <img 
+              src={imageUrl} 
+              alt="Question image" 
+              className="max-w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(imageUrl, '_blank')}
+            />
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="pt-3 border-t border-border/50">

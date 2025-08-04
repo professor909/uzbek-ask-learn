@@ -142,6 +142,7 @@ const QuestionFeed = () => {
                   isBestAnswer={question.is_solved}
                   userVote={question.user_vote}
                   authorId={question.user_id}
+                  imageUrl={question.image_url}
                   onVote={voteOnQuestion}
                   onDeleted={refetch}
                 />

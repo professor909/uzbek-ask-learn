@@ -134,8 +134,9 @@ const QuestionDetail = () => {
 
     setSubmitting(true);
     try {
-      await createAnswer(newAnswer.trim());
+      await createAnswer(newAnswer.trim(), answerImage);
       setNewAnswer("");
+      setAnswerImage("");
       toast({
         title: "Ответ опубликован!",
         description: "Спасибо за вклад в сообщество. Ваш ответ поможет другим студентам.",
@@ -212,6 +213,16 @@ const QuestionDetail = () => {
           <CardContent>
             <div className="prose prose-gray max-w-none">
               <p className="text-foreground whitespace-pre-wrap">{question.content}</p>
+              {question.image_url && (
+                <div className="mt-4">
+                  <img 
+                    src={question.image_url} 
+                    alt="Question image" 
+                    className="max-w-full h-auto rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => window.open(question.image_url, '_blank')}
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -266,6 +277,16 @@ const QuestionDetail = () => {
                       <div className="flex-1">
                         <div className="prose prose-gray max-w-none mb-4">
                           <p className="text-foreground whitespace-pre-wrap">{answer.content}</p>
+                          {answer.image_url && (
+                            <div className="mt-3">
+                              <img 
+                                src={answer.image_url} 
+                                alt="Answer image" 
+                                className="max-w-full h-auto rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(answer.image_url, '_blank')}
+                              />
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center text-sm text-muted-foreground">
                           <User className="w-4 h-4 mr-1" />

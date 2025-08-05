@@ -9,70 +9,107 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 import { UserAvatar } from "./UserAvatar";
-
 const HeroSection = () => {
-  const { user } = useAuth();
-  const { t } = useLanguage();
+  const {
+    user
+  } = useAuth();
+  const {
+    t
+  } = useLanguage();
   const navigate = useNavigate();
   const [animateStats, setAnimateStats] = useState(false);
-  const [stats, setStats] = useState([
-    { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: "0", color: "text-primary" },
-    { icon: Users, labelKey: "hero.stats.participants", value: "0", color: "text-accent-warm" },
-    { icon: Award, labelKey: "hero.stats.experts", value: "0", color: "text-expert" },
-    { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: "0", color: "text-success" },
-  ]);
+  const [stats, setStats] = useState([{
+    icon: BookOpen,
+    labelKey: "hero.stats.activeQuestions",
+    value: "0",
+    color: "text-primary"
+  }, {
+    icon: Users,
+    labelKey: "hero.stats.participants",
+    value: "0",
+    color: "text-accent-warm"
+  }, {
+    icon: Award,
+    labelKey: "hero.stats.experts",
+    value: "0",
+    color: "text-expert"
+  }, {
+    icon: TrendingUp,
+    labelKey: "hero.stats.solvedTasks",
+    value: "0",
+    color: "text-success"
+  }]);
   const [topUsers, setTopUsers] = useState<any[]>([]);
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
         // Fetch questions count
-        const { count: questionsCount } = await supabase
-          .from('questions')
-          .select('*', { count: 'exact', head: true });
+        const {
+          count: questionsCount
+        } = await supabase.from('questions').select('*', {
+          count: 'exact',
+          head: true
+        });
 
         // Fetch users count
-        const { count: usersCount } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
+        const {
+          count: usersCount
+        } = await supabase.from('profiles').select('*', {
+          count: 'exact',
+          head: true
+        });
 
         // Fetch experts count
-        const { count: expertsCount } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_expert', true);
+        const {
+          count: expertsCount
+        } = await supabase.from('profiles').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('is_expert', true);
 
         // Fetch solved questions count
-        const { count: solvedCount } = await supabase
-          .from('questions')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_solved', true);
-
-        setStats([
-          { icon: BookOpen, labelKey: "hero.stats.activeQuestions", value: questionsCount?.toString() || "0", color: "text-primary" },
-          { icon: Users, labelKey: "hero.stats.participants", value: usersCount?.toString() || "0", color: "text-accent-warm" },
-          { icon: Award, labelKey: "hero.stats.experts", value: expertsCount?.toString() || "0", color: "text-expert" },
-          { icon: TrendingUp, labelKey: "hero.stats.solvedTasks", value: solvedCount?.toString() || "0", color: "text-success" },
-        ]);
+        const {
+          count: solvedCount
+        } = await supabase.from('questions').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('is_solved', true);
+        setStats([{
+          icon: BookOpen,
+          labelKey: "hero.stats.activeQuestions",
+          value: questionsCount?.toString() || "0",
+          color: "text-primary"
+        }, {
+          icon: Users,
+          labelKey: "hero.stats.participants",
+          value: usersCount?.toString() || "0",
+          color: "text-accent-warm"
+        }, {
+          icon: Award,
+          labelKey: "hero.stats.experts",
+          value: expertsCount?.toString() || "0",
+          color: "text-expert"
+        }, {
+          icon: TrendingUp,
+          labelKey: "hero.stats.solvedTasks",
+          value: solvedCount?.toString() || "0",
+          color: "text-success"
+        }]);
 
         // Fetch top users of the month
-        const { data: topUsersData } = await supabase
-          .from('profiles')
-          .select('id, username, display_name, avatar_url, points, role')
-          .order('points', { ascending: false })
-          .limit(5);
-
+        const {
+          data: topUsersData
+        } = await supabase.from('profiles').select('id, username, display_name, avatar_url, points, role').order('points', {
+          ascending: false
+        }).limit(5);
         setTopUsers(topUsersData || []);
       } catch (error) {
         console.error('Error fetching stats:', error);
       }
     };
-
     fetchStats();
   }, []);
-
-  return (
-    <div className="relative overflow-hidden bg-gradient-hero rounded-2xl p-8 lg:p-12 mb-8">
+  return <div className="relative overflow-hidden bg-gradient-hero rounded-2xl p-8 lg:p-12 mb-8">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent-warm/10 animate-pulse-glow"></div>
       <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-accent-warm/20 to-transparent rounded-full -translate-y-36 translate-x-36"></div>
@@ -83,10 +120,7 @@ const HeroSection = () => {
           {/* Hero Content */}
           <div className="space-y-6">
             <div className="space-y-2">
-              <Badge 
-                variant="outline" 
-                className="bg-white/10 border-white/20 text-white backdrop-blur-sm animate-fade-in"
-              >
+              <Badge variant="outline" className="bg-white/10 border-white/20 text-white backdrop-blur-sm animate-fade-in">
                 <Sparkles className="w-3 h-3 mr-1" />
                 {t('hero.title')}
               </Badge>
@@ -100,27 +134,16 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-in-right">
-              {user ? (
-                <CreateQuestionDialog />
-              ) : (
-                <Button 
-                  size="lg" 
-                  className="bg-white text-primary hover:bg-white/90 font-semibold px-8"
-                  onClick={() => navigate("/auth")}
-                >
+              {user ? <CreateQuestionDialog /> : <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8" onClick={() => navigate("/auth")}>
                   {t('questions.askQuestion')}
                   <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-white/50 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm font-semibold"
-                onClick={() => {
-                  const element = document.getElementById('questions-section');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
+                </Button>}
+              <Button variant="outline" size="lg" className="border-white/50 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm font-semibold" onClick={() => {
+              const element = document.getElementById('questions-section');
+              element?.scrollIntoView({
+                behavior: 'smooth'
+              });
+            }}>
                 {t('hero.exploreQuestions')}
               </Button>
             </div>
@@ -129,14 +152,10 @@ const HeroSection = () => {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 gap-4">
             {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <Card 
-                  key={stat.labelKey}
-                  className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onMouseEnter={() => setAnimateStats(true)}
-                >
+            const Icon = stat.icon;
+            return <Card key={stat.labelKey} className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 animate-fade-in" style={{
+              animationDelay: `${index * 0.1}s`
+            }} onMouseEnter={() => setAnimateStats(true)}>
                   <CardContent className="p-4 text-center">
                     <Icon className={`w-8 h-8 mx-auto mb-2 ${stat.color} ${animateStats ? 'animate-bounce' : ''}`} />
                     <div className="text-2xl font-bold text-white mb-1">
@@ -146,45 +165,13 @@ const HeroSection = () => {
                       {t(stat.labelKey)}
                     </div>
                   </CardContent>
-                </Card>
-              );
-            })}
+                </Card>;
+          })}
           </div>
         </div>
         
         {/* Top Users Section */}
-        {topUsers.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-white/20">
-            <h3 className="text-xl font-semibold text-white mb-6 text-center">Топ участники месяца</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {topUsers.map((user, index) => (
-                <Card key={user.id} className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300">
-                  <CardContent className="p-4 text-center">
-                    <div className="flex flex-col items-center space-y-2">
-                      <UserAvatar 
-                        avatarUrl={user.avatar_url}
-                        displayName={user.display_name}
-                        username={user.username}
-                        size="md"
-                      />
-                      <div>
-                        <div className="text-sm font-medium text-white">
-                          {user.display_name || user.username || 'Аноним'}
-                        </div>
-                        <div className="text-xs text-white/70">
-                          {user.points} баллов
-                        </div>
-                        <Badge variant="outline" className="text-xs bg-white/10 border-white/20 text-white">
-                          {user.role || 'novice'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+        {topUsers.length > 0}
         
         {/* Quick Actions */}
         <div className="mt-12 pt-8 border-t border-white/20">
@@ -207,8 +194,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroSection;

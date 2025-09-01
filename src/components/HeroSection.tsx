@@ -171,7 +171,36 @@ const HeroSection = () => {
         </div>
         
         {/* Top Users Section */}
-        {topUsers.length > 0}
+        {topUsers.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-white/20">
+            <h3 className="text-lg font-semibold text-white mb-4">Топ участники месяца</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              {topUsers.map((user, index) => (
+                <div key={user.id} className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-3 hover:bg-white/20 transition-all duration-200">
+                  <UserAvatar 
+                    avatarUrl={user.avatar_url}
+                    displayName={user.display_name}
+                    username={user.username}
+                    size="md"
+                    className="mx-auto mb-2"
+                  />
+                  <div className="text-xs text-white/90 font-medium mb-1">
+                    {user.display_name || user.username}
+                  </div>
+                  <div className="text-xs text-white/70">
+                    {user.points} баллов
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs mt-1 bg-white/10 border-white/30 text-white"
+                  >
+                    {user.role || 'novice'}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Quick Actions */}
         <div className="mt-12 pt-8 border-t border-white/20">

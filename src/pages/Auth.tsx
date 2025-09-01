@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,11 @@ const Auth = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  const [showReset, setShowReset] = useState(false);
+  const [showUpdatePassword, setShowUpdatePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,6 +35,12 @@ const Auth = () => {
     });
   }, [navigate]);
 
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'reset') {
+      setShowUpdatePassword(true);
+    }
+  }, [searchParams]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -153,6 +163,36 @@ const Auth = () => {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== newPassword2) {
+      setError("Пароли не совпадают");
+      toast({ title: "Ошибка", description: "Пароли не совпадают", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({ title: "Ошибка", description: "Ссылка недействительна или устарела. Повторите сброс пароля.", variant: "destructive" });
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        setError(error.message);
+        toast({ title: "Не удалось обновить пароль", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Пароль обновлён", description: "Теперь вы можете войти с новым паролем." });
+        setShowUpdatePassword(false);
+        setNewPassword(""); setNewPassword2("");
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -170,7 +210,7 @@ const Auth = () => {
 
         <Card className="shadow-elevated border-0 bg-card/95 backdrop-blur-sm animate-scale-in">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className={showReset || showUpdatePassword ? "hidden" : "grid w-full grid-cols-2 mb-6"}>
               <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-white">
                 Вход
               </TabsTrigger>
@@ -185,7 +225,7 @@ const Auth = () => {
               </Alert>
             )}
             
-            <TabsContent value="signin">
+            <TabsContent value="signin" className={(showReset || showUpdatePassword) ? "hidden" : ""}>
               <CardHeader className="text-center pb-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Lock className="w-6 h-6 text-primary" />
@@ -234,15 +274,7 @@ const Auth = () => {
                 <div className="mt-4 text-center">
                   <Button
                     variant="link"
-                    onClick={() => {
-                      // Show reset password form
-                      const resetForm = document.getElementById('reset-password-form');
-                      const currentContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
-                      if (resetForm && currentContent) {
-                        currentContent.style.display = 'none';
-                        resetForm.classList.remove('hidden');
-                      }
-                    }}
+                    onClick={() => setShowReset(true)}
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Забыли пароль?
@@ -332,8 +364,8 @@ const Auth = () => {
               </CardContent>
             </TabsContent>
 
-            {/* Hidden Reset Password Content */}
-            <div className="hidden" id="reset-password-form">
+            {/* Reset Password Content */}
+            <div className={showReset ? '' : 'hidden'} id="reset-password-form">
               <CardHeader className="text-center pb-4">
                 <div className="w-12 h-12 bg-accent-warm/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <KeyRound className="w-6 h-6 text-accent-warm" />
@@ -377,14 +409,7 @@ const Auth = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => {
-                        const resetForm = document.getElementById('reset-password-form');
-                        const signinContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
-                        if (resetForm && signinContent) {
-                          resetForm.classList.add('hidden');
-                          signinContent.style.display = 'block';
-                        }
-                      }}
+                      onClick={() => setShowReset(false)}
                       className="w-full"
                     >
                       Назад к входу
@@ -413,14 +438,9 @@ const Auth = () => {
                     <Button
                       variant="ghost"
                       onClick={() => {
-                        const resetForm = document.getElementById('reset-password-form');
-                        const signinContent = document.querySelector('[data-state="active"]')?.querySelector('form')?.parentElement;
-                        if (resetForm && signinContent) {
-                          resetForm.classList.add('hidden');
-                          signinContent.style.display = 'block';
-                        }
                         setResetSent(false);
                         setResetEmail("");
+                        setShowReset(false);
                       }}
                       className="w-full"
                     >
@@ -428,6 +448,59 @@ const Auth = () => {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </div>
+
+            {/* Update Password Content (after email link) */}
+            <div className={showUpdatePassword ? '' : 'hidden'}>
+              <CardHeader className="text-center pb-4">
+                <div className="w-12 h-12 bg-accent-warm/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="w-6 h-6 text-accent-warm" />
+                </div>
+                <CardTitle className="text-xl">Создайте новый пароль</CardTitle>
+                <CardDescription>Введите новый пароль для вашего аккаунта</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">Новый пароль</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="new-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password2">Повторите пароль</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="new-password2"
+                        type="password"
+                        placeholder="••••••••"
+                        value={newPassword2}
+                        onChange={(e) => setNewPassword2(e.target.value)}
+                        className="pl-10"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Сохранение..." : "Сохранить пароль"}
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setShowUpdatePassword(false)} className="w-full">
+                    Отмена
+                  </Button>
+                </form>
               </CardContent>
             </div>
 

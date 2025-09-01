@@ -387,7 +387,7 @@ const QuestionDetail = () => {
         </div>
 
         {/* Add Answer Form */}
-        {user ? (
+        {user && question && user.id !== question.user_id && answers.length < 3 ? (
           <Card className="shadow-card border-border/50 animate-scale-in">
             <CardHeader>
               <h3 className="text-lg font-semibold text-foreground">Ваш ответ</h3>
@@ -420,6 +420,24 @@ const QuestionDetail = () => {
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+        ) : user && question && user.id === question.user_id ? (
+          <Card className="shadow-card border-border/50 text-center">
+            <CardContent className="py-8">
+              <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                Нельзя отвечать на собственные вопросы
+              </p>
+            </CardContent>
+          </Card>
+        ) : user && answers.length >= 3 ? (
+          <Card className="shadow-card border-border/50 text-center">
+            <CardContent className="py-8">
+              <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                На этот вопрос уже дано максимальное количество ответов (3)
+              </p>
             </CardContent>
           </Card>
         ) : (

@@ -106,6 +106,42 @@ export const useAnswers = (questionId: string) => {
     }
 
     try {
+      // Проверяем информацию о вопросе
+      const { data: questionData, error: questionError } = await supabase
+        .from('questions')
+        .select('user_id')
+        .eq('id', questionId)
+        .single();
+
+      if (questionError) throw questionError;
+
+      // Проверяем, что пользователь не автор вопроса
+      if (questionData.user_id === user.id) {
+        toast({
+          title: 'Ошибка',
+          description: 'Нельзя отвечать на собственные вопросы',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Проверяем количество существующих ответов
+      const { count: answersCount, error: countError } = await supabase
+        .from('answers')
+        .select('*', { count: 'exact', head: true })
+        .eq('question_id', questionId);
+
+      if (countError) throw countError;
+
+      if (answersCount && answersCount >= 3) {
+        toast({
+          title: 'Ошибка',
+          description: 'На вопрос уже дано максимальное количество ответов (3)',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase.from('answers').insert({
         content: content.trim(),
         question_id: questionId,

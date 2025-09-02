@@ -45,18 +45,46 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
   useEffect(() => {
     const fetchCategoryCounts = async () => {
       try {
-        const categoriesData = getCategoriesData(t);
-        const categoriesWithCounts = await Promise.all(
-          categoriesData.map(async (category) => {
-            const { count } = await supabase
-              .from('questions')
-              .select('*', { count: 'exact', head: true })
-              .eq('category', category.key);
-            
-            return { ...category, count: count || 0 };
+        // Fetch all categories once and aggregate on the client for reliability
+        const { data } = await supabase
+          .from('questions')
+          .select('category');
+
+        const countsMap = new Map<string, number>();
+        (data as Array<{ category: string }> | null || []).forEach((row) => {
+          const key = row.category;
+          countsMap.set(key, (countsMap.get(key) || 0) + 1);
+        });
+
+        // Known colors for popular categories; others will use defaults
+        const colorMap: Record<string, { color: string; bgColor: string }> = {
+          math: { color: 'hsl(217, 91%, 60%)', bgColor: 'hsl(217, 91%, 95%)' },
+          physics: { color: 'hsl(142, 76%, 36%)', bgColor: 'hsl(142, 76%, 95%)' },
+          informatics: { color: 'hsl(271, 91%, 65%)', bgColor: 'hsl(271, 91%, 95%)' },
+          chemistry: { color: 'hsl(0, 84%, 60%)', bgColor: 'hsl(0, 84%, 95%)' },
+          biology: { color: 'hsl(48, 96%, 53%)', bgColor: 'hsl(48, 96%, 95%)' },
+          literature: { color: 'hsl(25, 95%, 53%)', bgColor: 'hsl(25, 95%, 95%)' },
+        };
+
+        const allCategories: CategoryData[] = Array.from(countsMap.entries()).map(
+          ([key, count]) => ({
+            key,
+            name: t(`category.${key}`) || key,
+            count,
+            color: colorMap[key]?.color || 'hsl(217, 91%, 60%)',
+            bgColor: colorMap[key]?.bgColor || 'hsl(217, 91%, 95%)',
           })
         );
-        setCategories(categoriesWithCounts);
+
+        if (allCategories.length === 0) {
+          // Fallback to predefined list (keeps UI populated even with no data)
+          setCategories(getCategoriesData(t));
+          return;
+        }
+
+        // Show top 6 by question count
+        const top = allCategories.sort((a, b) => b.count - a.count).slice(0, 6);
+        setCategories(top);
       } catch (error) {
         console.error('Error fetching category counts:', error);
       }
@@ -152,7 +180,7 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
               key={category.name}
               variant="ghost"
               className="w-full justify-between h-auto p-3 hover:bg-secondary/80 transition-colors"
-              onClick={() => onCategoryClick?.(category.name)}
+              onClick={() => onCategoryClick?.(category.key)}
             >
               <div className="flex items-center space-x-3">
                 <div 

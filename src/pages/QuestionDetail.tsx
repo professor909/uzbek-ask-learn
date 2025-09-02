@@ -246,15 +246,6 @@ const QuestionDetail = () => {
                 </div>
               </div>
               <div className="flex flex-col items-center space-y-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => voteOnQuestion(question.id, 1)}
-                  className={`p-2 ${question.user_vote === 1 ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary'}`}
-                >
-                  <ThumbsUp className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-medium">{question.likes_count || 0}</span>
                 <div className="text-center">
                   <div className="text-lg font-bold text-primary">{question.points}</div>
                   <div className="text-xs text-muted-foreground">баллов</div>
@@ -320,6 +311,14 @@ const QuestionDetail = () => {
                           <ThumbsUp className="w-4 h-4" />
                         </Button>
                         <span className="text-sm font-medium">{answer.likes_count || 0}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => voteOnAnswer(answer.id, -1)}
+                          className={`p-2 ${answer.user_vote === -1 ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-destructive'}`}
+                        >
+                          <ThumbsUp className="w-4 h-4 rotate-180" />
+                        </Button>
                         {answer.is_best_answer && (
                           <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
                             <Trophy className="w-3 h-3 mr-1" />

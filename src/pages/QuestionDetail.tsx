@@ -10,6 +10,7 @@ import { useAnswers } from "@/hooks/useAnswers";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminActions } from "@/hooks/useAdminActions";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { ImageUpload } from "@/components/ImageUpload";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -185,6 +186,33 @@ const QuestionDetail = () => {
     }
   };
 
+  const handleSetBestAnswer = async (answerId: string) => {
+    if (!user || !question || user.id !== question.user_id) return;
+
+    try {
+      // Set answer as best answer
+      const { error } = await supabase
+        .from('answers')
+        .update({ is_best_answer: true })
+        .eq('id', answerId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Лучший ответ выбран!",
+        description: "Ответ отмечен как лучший.",
+      });
+
+      refetchAnswers();
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось выбрать лучший ответ.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const canManageAnswer = (answer: any) => {
     return user && (
       user.id === answer.user_id || 
@@ -324,7 +352,18 @@ const QuestionDetail = () => {
                             <Trophy className="w-3 h-3 mr-1" />
                             Лучший
                           </Badge>
-                         )}
+                        )}
+                        {user && question && user.id === question.user_id && !answers.some(a => a.is_best_answer) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSetBestAnswer(answer.id)}
+                            className="text-muted-foreground hover:text-success"
+                            title="Выбрать как лучший ответ"
+                          >
+                            <Trophy className="w-4 h-4" />
+                          </Button>
+                        )}
                        </div>
                        <div className="flex-1">
                          <div className="prose prose-gray max-w-none mb-4">

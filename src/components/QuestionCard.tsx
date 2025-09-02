@@ -183,6 +183,15 @@ const QuestionCard = ({
               <MessageCircle className="w-4 h-4 mr-1" />
               {answersCount}/3
             </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`${userVote === 1 ? 'text-accent-warm' : 'text-muted-foreground hover:text-accent-warm'}`}
+              onClick={() => handleVote(1)}
+            >
+              <Heart className={`w-4 h-4 mr-1 ${userVote === 1 ? 'fill-current' : ''}`} />
+              {likesCount}
+            </Button>
           </div>
           
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
@@ -192,13 +201,20 @@ const QuestionCard = ({
                 displayName={authorName}
                 size="sm"
               />
-              <span className="font-medium">{authorName}</span>
+              <div className="hidden sm:flex flex-col">
+                <span className="font-medium">{authorName}</span>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="outline" className="text-xs">
+                    {translateRank(authorRank)}
+                  </Badge>
+                  <span>•</span>
+                  <span>{timeAgo}</span>
+                </div>
+              </div>
+              <div className="sm:hidden">
+                <span className="font-medium text-xs">{authorName}</span>
+              </div>
             </div>
-            <Badge variant="outline" className="text-xs">
-              {translateRank(authorRank)}
-            </Badge>
-            <span>•</span>
-            <span>{timeAgo}</span>
           </div>
         </div>
       </CardFooter>

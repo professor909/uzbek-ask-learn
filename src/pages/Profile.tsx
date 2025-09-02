@@ -70,6 +70,7 @@ const Profile = () => {
   });
   const [userQuestions, setUserQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
+  const [likedQuestions, setLikedQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -85,6 +86,7 @@ const Profile = () => {
       fetchStats();
       fetchUserQuestions();
       fetchUserAnswers();
+      fetchLikedQuestions();
     }
   }, [user]);
 
@@ -202,6 +204,62 @@ const Profile = () => {
       setUserAnswers(answersWithQuestions);
     } catch (error) {
       console.error("Error fetching user answers:", error);
+    }
+  };
+
+  const fetchLikedQuestions = async () => {
+    if (!user) return;
+
+    try {
+      // Get questions user has liked
+      const { data: votedQuestionIds, error: votesError } = await supabase
+        .from("votes")
+        .select("question_id")
+        .eq("user_id", user.id)
+        .eq("vote_type", 1)
+        .not("question_id", "is", null);
+
+      if (votesError) throw votesError;
+
+      if (!votedQuestionIds || votedQuestionIds.length === 0) {
+        setLikedQuestions([]);
+        return;
+      }
+
+      // Get questions details
+      const { data: questions, error: questionsError } = await supabase
+        .from("questions")
+        .select("*")
+        .in("id", votedQuestionIds.map(v => v.question_id))
+        .order("created_at", { ascending: false });
+
+      if (questionsError) throw questionsError;
+
+      // Get answers count and likes count for each question
+      const questionsWithCounts = await Promise.all(
+        (questions || []).map(async (question) => {
+          const { count: answersCount } = await supabase
+            .from("answers")
+            .select("*", { count: "exact", head: true })
+            .eq("question_id", question.id);
+
+          const { count: likesCount } = await supabase
+            .from("votes")
+            .select("*", { count: "exact", head: true })
+            .eq("question_id", question.id)
+            .eq("vote_type", 1);
+
+          return {
+            ...question,
+            answers_count: answersCount || 0,
+            likes_count: likesCount || 0,
+          };
+        })
+      );
+
+      setLikedQuestions(questionsWithCounts);
+    } catch (error) {
+      console.error("Error fetching liked questions:", error);
     }
   };
 
@@ -499,9 +557,19 @@ const Profile = () => {
 
         {/* Activity Tabs */}
         <Tabs defaultValue="questions" className="animate-fade-in">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="questions">Мои вопросы ({stats.questionsCount})</TabsTrigger>
-            <TabsTrigger value="answers">Мои ответы ({stats.answersCount})</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="questions" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Мои вопросы
+            </TabsTrigger>
+            <TabsTrigger value="answers" className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Мои ответы
+            </TabsTrigger>
+            <TabsTrigger value="liked" className="flex items-center gap-2">
+              <Heart className="w-4 h-4" />
+              Понравившиеся
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="questions" className="space-y-4 mt-6">
@@ -598,6 +666,66 @@ const Profile = () => {
                 </Card>
               ))
             )}
+          </TabsContent>
+          {/* Liked Questions Tab */}
+          <TabsContent value="liked" className="space-y-4">
+            <Card className="shadow-card border-border/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-accent-warm" />
+                  Понравившиеся вопросы ({likedQuestions.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {likedQuestions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Вы ещё не лайкали ни одного вопроса</p>
+                    <p className="text-sm text-muted-foreground mt-2">Ставьте лайки интересным вопросам!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {likedQuestions.map((question) => (
+                      <div 
+                        key={question.id}
+                        className="p-4 border border-border/50 rounded-lg hover:shadow-card transition-shadow cursor-pointer"
+                        onClick={() => window.location.href = `/question/${question.id}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-2">
+                            {question.title}
+                          </h3>
+                          <div className="flex items-center gap-2 ml-4">
+                            <Badge variant="secondary" className="text-xs">
+                              {question.category}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {question.points} баллов
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                          {question.content}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1">
+                              <MessageCircle className="w-3 h-3" />
+                              {question.answers_count}/3
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Heart className="w-3 h-3" />
+                              {question.likes_count}
+                            </span>
+                          </div>
+                          <span>{formatDate(question.created_at)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

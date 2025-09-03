@@ -7,6 +7,8 @@ import SearchAndFilter from "./SearchAndFilter";
 import QuestionSidebar from "./QuestionSidebar";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "./PaginationControls";
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
@@ -60,6 +62,18 @@ const QuestionFeed = () => {
 
     return filtered;
   }, [questions, searchQuery, selectedCategory, sortBy, language]);
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    goToPage,
+    hasNextPage,
+    hasPrevPage
+  } = usePagination({
+    data: filteredQuestions,
+    itemsPerPage: 10
+  });
 
   return (
     <main className="flex-1">
@@ -125,7 +139,7 @@ const QuestionFeed = () => {
             </Card>
           ) : (
             <div id="questions-section" className="space-y-6">
-              {filteredQuestions.map((question) => (
+              {paginatedData.map((question) => (
                 <QuestionCard 
                   key={question.id} 
                   id={question.id}
@@ -148,6 +162,14 @@ const QuestionFeed = () => {
                   onDeleted={refetch}
                 />
               ))}
+              
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                hasNextPage={hasNextPage}
+                hasPrevPage={hasPrevPage}
+              />
             </div>
           )}
         </div>

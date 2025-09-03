@@ -190,6 +190,15 @@ const QuestionDetail = () => {
     if (!user || !question || user.id !== question.user_id) return;
 
     try {
+      // Get the answer details first to get the user_id for notification
+      const { data: answerData, error: answerError } = await supabase
+        .from('answers')
+        .select('user_id')
+        .eq('id', answerId)
+        .single();
+
+      if (answerError) throw answerError;
+
       // Set answer as best answer
       const { error } = await supabase
         .from('answers')
@@ -197,6 +206,25 @@ const QuestionDetail = () => {
         .eq('id', answerId);
 
       if (error) throw error;
+
+      // Create notification for the answer author
+      if (answerData && answerData.user_id !== user.id) {
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: answerData.user_id,
+            type: 'best_answer',
+            title: 'Ваш ответ выбран лучшим!',
+            content: `Ваш ответ на вопрос "${question.title.substring(0, 50)}..." был отмечен как лучший`,
+            related_question_id: question.id,
+            related_answer_id: answerId,
+            related_user_id: user.id
+          });
+
+        if (notificationError) {
+          console.error('Error creating notification:', notificationError);
+        }
+      }
 
       toast({
         title: "Лучший ответ выбран!",

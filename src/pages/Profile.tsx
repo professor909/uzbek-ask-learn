@@ -15,6 +15,8 @@ import {
   User, Edit, Save, X, Camera, Star, MessageCircle, Trophy, 
   Heart, Award, BookOpen, Calendar, Crown
 } from "lucide-react";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/PaginationControls";
 
 interface Profile {
   id: string;
@@ -71,6 +73,7 @@ const Profile = () => {
   const [userQuestions, setUserQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
   const [likedQuestions, setLikedQuestions] = useState<Question[]>([]);
+  const [bestAnswers, setBestAnswers] = useState<Answer[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -87,6 +90,7 @@ const Profile = () => {
       fetchUserQuestions();
       fetchUserAnswers();
       fetchLikedQuestions();
+      fetchBestAnswers();
     }
   }, [user]);
 
@@ -263,6 +267,47 @@ const Profile = () => {
     }
   };
 
+  const fetchBestAnswers = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("answers")
+        .select(`
+          id,
+          content,
+          created_at,
+          is_best_answer,
+          question_id
+        `)
+        .eq("user_id", user.id)
+        .eq("is_best_answer", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      // Fetch question titles for best answers
+      const bestAnswersWithQuestions = await Promise.all(
+        (data || []).map(async (answer) => {
+          const { data: questionData } = await supabase
+            .from("questions")
+            .select("id, title")
+            .eq("id", answer.question_id)
+            .single();
+          
+          return {
+            ...answer,
+            question: questionData
+          };
+        })
+      );
+      
+      setBestAnswers(bestAnswersWithQuestions);
+    } catch (error) {
+      console.error("Error fetching best answers:", error);
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!user || !profile) return;
 
@@ -385,6 +430,27 @@ const Profile = () => {
       day: 'numeric'
     });
   };
+
+  // Pagination for all lists
+  const questionsPagination = usePagination({
+    data: userQuestions,
+    itemsPerPage: 10
+  });
+
+  const answersPagination = usePagination({
+    data: userAnswers,
+    itemsPerPage: 10
+  });
+
+  const bestAnswersPagination = usePagination({
+    data: bestAnswers,
+    itemsPerPage: 10
+  });
+
+  const likedQuestionsPagination = usePagination({
+    data: likedQuestions,
+    itemsPerPage: 10
+  });
 
   if (!user) {
     return (
@@ -557,7 +623,7 @@ const Profile = () => {
 
         {/* Activity Tabs */}
         <Tabs defaultValue="questions" className="animate-fade-in">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="questions" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Мои вопросы
@@ -565,6 +631,10 @@ const Profile = () => {
             <TabsTrigger value="answers" className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
               Мои ответы
+            </TabsTrigger>
+            <TabsTrigger value="best-answers" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Лучшие ответы
             </TabsTrigger>
             <TabsTrigger value="liked" className="flex items-center gap-2">
               <Heart className="w-4 h-4" />
@@ -582,7 +652,8 @@ const Profile = () => {
                 </CardContent>
               </Card>
             ) : (
-              userQuestions.map((question, index) => (
+              <>
+                {questionsPagination.paginatedData.map((question, index) => (
                 <Card 
                   key={question.id} 
                   className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer"
@@ -613,7 +684,16 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+                ))}
+                
+                <PaginationControls
+                  currentPage={questionsPagination.currentPage}
+                  totalPages={questionsPagination.totalPages}
+                  onPageChange={questionsPagination.goToPage}
+                  hasNextPage={questionsPagination.hasNextPage}
+                  hasPrevPage={questionsPagination.hasPrevPage}
+                />
+              </>
             )}
           </TabsContent>
 
@@ -627,7 +707,8 @@ const Profile = () => {
                 </CardContent>
               </Card>
             ) : (
-              userAnswers.map((answer, index) => (
+              <>
+                {answersPagination.paginatedData.map((answer, index) => (
                 <Card 
                   key={answer.id} 
                   className={`shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ${
@@ -664,9 +745,77 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+                ))}
+                
+                <PaginationControls
+                  currentPage={answersPagination.currentPage}
+                  totalPages={answersPagination.totalPages}
+                  onPageChange={answersPagination.goToPage}
+                  hasNextPage={answersPagination.hasNextPage}
+                  hasPrevPage={answersPagination.hasPrevPage}
+                />
+              </>
             )}
           </TabsContent>
+
+          <TabsContent value="best-answers" className="space-y-4 mt-6">
+            {bestAnswers.length === 0 ? (
+              <Card className="shadow-card">
+                <CardContent className="text-center py-12">
+                  <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Нет лучших ответов</h3>
+                  <p className="text-muted-foreground">Ваши ответы ещё не были отмечены как лучшие</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {bestAnswersPagination.paginatedData.map((answer, index) => (
+                <Card 
+                  key={answer.id} 
+                  className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ring-2 ring-success/50 bg-success/5"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => window.location.href = `/question/${answer.question?.id}`}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className="bg-success text-success-foreground">
+                            <Star className="w-3 h-3 mr-1" />
+                            Лучший ответ
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold hover:text-primary transition-colors">
+                          {answer.question?.title || "Вопрос удалён"}
+                        </h3>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm line-clamp-3 mb-3">
+                      {answer.content}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(answer.created_at)}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+                ))}
+                
+                <PaginationControls
+                  currentPage={bestAnswersPagination.currentPage}
+                  totalPages={bestAnswersPagination.totalPages}
+                  onPageChange={bestAnswersPagination.goToPage}
+                  hasNextPage={bestAnswersPagination.hasNextPage}
+                  hasPrevPage={bestAnswersPagination.hasPrevPage}
+                />
+              </>
+            )}
+          </TabsContent>
+
           {/* Liked Questions Tab */}
           <TabsContent value="liked" className="space-y-4">
             <Card className="shadow-card border-border/50">
@@ -685,7 +834,7 @@ const Profile = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {likedQuestions.map((question) => (
+                    {likedQuestionsPagination.paginatedData.map((question) => (
                       <div 
                         key={question.id}
                         className="p-4 border border-border/50 rounded-lg hover:shadow-card transition-shadow cursor-pointer"
@@ -722,6 +871,14 @@ const Profile = () => {
                         </div>
                       </div>
                     ))}
+                    
+                    <PaginationControls
+                      currentPage={likedQuestionsPagination.currentPage}
+                      totalPages={likedQuestionsPagination.totalPages}
+                      onPageChange={likedQuestionsPagination.goToPage}
+                      hasNextPage={likedQuestionsPagination.hasNextPage}
+                      hasPrevPage={likedQuestionsPagination.hasPrevPage}
+                    />
                   </div>
                 )}
               </CardContent>

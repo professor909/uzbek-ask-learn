@@ -121,8 +121,7 @@ export const useAdminActions = () => {
         .eq('id', user.id)
         .single();
 
-      const canDelete = answer.user_id === user.id || 
-                       profile?.role === 'admin' || 
+      const canDelete = profile?.role === 'admin' || 
                        profile?.role === 'expert';
 
       if (!canDelete) {

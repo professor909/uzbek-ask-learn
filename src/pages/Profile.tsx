@@ -405,6 +405,49 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarDelete = async () => {
+    if (!user || !profile?.avatar_url) return;
+
+    setUploading(true);
+
+    try {
+      // Extract file path from URL
+      const url = new URL(profile.avatar_url);
+      const filePath = url.pathname.split('/').slice(-2).join('/'); // Extract "user_id/avatar.ext"
+
+      // Delete file from storage
+      const { error: deleteError } = await supabase.storage
+        .from('avatars')
+        .remove([filePath]);
+
+      if (deleteError) throw deleteError;
+
+      // Update profile to remove avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile(prev => prev ? { ...prev, avatar_url: null } : null);
+
+      toast({
+        title: "Аватар удалён",
+        description: "Ваша фотография успешно удалена.",
+      });
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      toast({
+        title: "Ошибка удаления",
+        description: "Не удалось удалить аватар.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const getReputationColor = (level: string) => {
     switch (level) {
       case "expert": return "text-expert";
@@ -498,13 +541,29 @@ const Profile = () => {
                   </AvatarFallback>
                 </Avatar>
                 
-                {/* Upload Avatar Button */}
-                <label 
-                  htmlFor="avatar-upload"
-                  className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                >
-                  <Camera className="w-6 h-6 text-white" />
-                </label>
+                {/* Avatar Controls */}
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2">
+                    <label 
+                      htmlFor="avatar-upload"
+                      className="bg-primary hover:bg-primary/80 text-white p-2 rounded-full cursor-pointer transition-colors"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </label>
+                    {profile.avatar_url && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        className="p-2 h-auto"
+                        onClick={handleAvatarDelete}
+                        disabled={uploading}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <input
                   id="avatar-upload"
                   type="file"

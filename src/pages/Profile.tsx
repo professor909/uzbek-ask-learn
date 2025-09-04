@@ -27,6 +27,7 @@ interface Profile {
   points: number;
   reputation_level: string;
   role: string;
+  is_expert: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -448,21 +449,56 @@ const Profile = () => {
     }
   };
 
-  const getReputationColor = (level: string) => {
-    switch (level) {
-      case "expert": return "text-expert";
-      case "advanced": return "text-accent-warm";
-      case "intermediate": return "text-primary";
-      default: return "text-muted-foreground";
+  const getReputationColor = (user: Profile) => {
+    // Admins get red color
+    if (user.role === 'admin') {
+      return 'text-destructive';
+    }
+    
+    // Experts get purple color
+    if (user.is_expert) {
+      return 'text-expert';
+    }
+    
+    // Regular users get colors based on their rank
+    switch (user.reputation_level) {
+      case 'academician':
+        return 'text-accent-warm';
+      case 'dsc':
+        return 'text-purple-600';
+      case 'phd':
+        return 'text-blue-600';
+      case 'master':
+        return 'text-green-600';
+      case 'student':
+        return 'text-primary';
+      case 'learner':
+        return 'text-muted-foreground';
+      default:
+        return 'text-muted-foreground';
     }
   };
 
-  const getReputationLabel = (level: string) => {
-    switch (level) {
-      case "expert": return "Эксперт";
-      case "advanced": return "Продвинутый";
-      case "intermediate": return "Опытный";
-      default: return "Новичок";
+  const getReputationLabel = (user: Profile) => {
+    // Admins show admin role
+    if (user.role === 'admin') {
+      return 'Администратор';
+    }
+    
+    // Experts show expert role
+    if (user.is_expert) {
+      return 'Эксперт';
+    }
+    
+    // Regular users show their points-based rank
+    switch (user.reputation_level) {
+      case 'academician': return 'Академик';
+      case 'dsc': return 'DSc';
+      case 'phd': return 'PhD';
+      case 'master': return 'Магистр';
+      case 'student': return 'Студент';
+      case 'learner': return 'Ученик';
+      default: return 'Новичок';
     }
   };
 
@@ -584,10 +620,10 @@ const Profile = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <Badge 
                         variant="outline" 
-                        className={`${getReputationColor(profile.reputation_level)} border-current`}
+                        className={`${getReputationColor(profile)} border-current`}
                       >
                         <Crown className="w-3 h-3 mr-1" />
-                        {getReputationLabel(profile.reputation_level)}
+                        {getReputationLabel(profile)}
                       </Badge>
                       <Badge variant="secondary">
                         {profile.points} баллов

@@ -7,8 +7,18 @@ export const useRankTranslation = () => {
     switch (rank) {
       case 'novice':
         return t('rank.novice');
+      case 'learner':
+        return t('rank.learner');
       case 'student':
         return t('rank.student');
+      case 'master':
+        return t('rank.master');
+      case 'phd':
+        return t('rank.phd');
+      case 'dsc':
+        return t('rank.dsc');
+      case 'academician':
+        return t('rank.academician');
       case 'expert':
         return t('rank.expert');
       case 'admin':

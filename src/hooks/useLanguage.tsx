@@ -54,7 +54,12 @@ const translations = {
 
     // Ranks
     'rank.novice': 'Новичок',
-    'rank.student': 'Студент',
+    'rank.learner': 'Ученик',
+    'rank.student': 'Студент', 
+    'rank.master': 'Магистр',
+    'rank.phd': 'PhD',
+    'rank.dsc': 'DSc',
+    'rank.academician': 'Академик',
     'rank.expert': 'Эксперт',
     'rank.admin': 'Администратор',
     'rank.blocked': 'Заблокирован',

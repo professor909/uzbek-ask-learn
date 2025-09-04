@@ -378,6 +378,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_rank_by_points: {
+        Args: { points_value: number }
+        Returns: string
+      }
       can_manage_users: {
         Args: Record<PropertyKey, never>
         Returns: boolean

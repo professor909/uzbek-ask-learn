@@ -151,7 +151,11 @@ const QuestionFeed = () => {
                   likesCount={question.likes_count || 0}
                   isExpert={question.is_expert}
                   authorName={question.profiles?.display_name || question.profiles?.username || 'Неизвестный'}
-                  authorRank={question.profiles?.role || 'Пользователь'}
+                  authorRank={
+                    question.profiles?.role === 'admin' ? 'admin' :
+                    question.profiles?.is_expert ? 'expert' :
+                    question.profiles?.reputation_level || 'novice'
+                  }
                   timeAgo={formatTimeAgo(question.created_at)}
                   isBestAnswer={question.is_solved}
                   userVote={question.user_vote}

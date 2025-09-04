@@ -11,13 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from "@/components/Header";
-import { 
-  User, Edit, Save, X, Camera, Star, MessageCircle, Trophy, 
-  Heart, Award, BookOpen, Calendar, Crown
-} from "lucide-react";
+import { User, Edit, Save, X, Camera, Star, MessageCircle, Trophy, Heart, Award, BookOpen, Calendar, Crown } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/PaginationControls";
-
 interface Profile {
   id: string;
   username: string | null;
@@ -31,14 +27,12 @@ interface Profile {
   created_at: string;
   updated_at: string;
 }
-
 interface UserStats {
   questionsCount: number;
   answersCount: number;
   totalLikes: number;
   bestAnswers: number;
 }
-
 interface Question {
   id: string;
   title: string;
@@ -49,7 +43,6 @@ interface Question {
   answers_count?: number;
   likes_count?: number;
 }
-
 interface Answer {
   id: string;
   content: string;
@@ -60,16 +53,19 @@ interface Answer {
     id: string;
   } | null;
 }
-
 const Profile = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<UserStats>({
     questionsCount: 0,
     answersCount: 0,
     totalLikes: 0,
-    bestAnswers: 0,
+    bestAnswers: 0
   });
   const [userQuestions, setUserQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
@@ -80,10 +76,9 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({
     display_name: "",
     username: "",
-    bio: "",
+    bio: ""
   });
   const [uploading, setUploading] = useState(false);
-
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -94,24 +89,19 @@ const Profile = () => {
       fetchBestAnswers();
     }
   }, [user]);
-
   const fetchProfile = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       if (error) throw error;
-
       setProfile(data);
       setEditForm({
         display_name: data.display_name || "",
         username: data.username || "",
-        bio: data.bio || "",
+        bio: data.bio || ""
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -119,347 +109,310 @@ const Profile = () => {
       setLoading(false);
     }
   };
-
   const fetchStats = async () => {
     if (!user) return;
-
     try {
       // Fetch questions count
-      const { count: questionsCount } = await supabase
-        .from("questions")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+      const {
+        count: questionsCount
+      } = await supabase.from("questions").select("*", {
+        count: "exact",
+        head: true
+      }).eq("user_id", user.id);
 
       // Fetch answers count  
-      const { count: answersCount } = await supabase
-        .from("answers")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+      const {
+        count: answersCount
+      } = await supabase.from("answers").select("*", {
+        count: "exact",
+        head: true
+      }).eq("user_id", user.id);
 
       // Fetch best answers count
-      const { count: bestAnswers } = await supabase
-        .from("answers")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_best_answer", true);
-
+      const {
+        count: bestAnswers
+      } = await supabase.from("answers").select("*", {
+        count: "exact",
+        head: true
+      }).eq("user_id", user.id).eq("is_best_answer", true);
       setStats({
         questionsCount: questionsCount || 0,
         answersCount: answersCount || 0,
         totalLikes: 0,
-        bestAnswers: bestAnswers || 0,
+        bestAnswers: bestAnswers || 0
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
   };
-
   const fetchUserQuestions = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from("questions").select("*").eq("user_id", user.id).order("created_at", {
+        ascending: false
+      });
       if (error) throw error;
-      
       setUserQuestions(data || []);
     } catch (error) {
       console.error("Error fetching user questions:", error);
     }
   };
-
   const fetchUserAnswers = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from("answers")
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from("answers").select(`
           id,
           content,
           created_at,
           is_best_answer,
           question_id
-        `)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
+        `).eq("user_id", user.id).order("created_at", {
+        ascending: false
+      });
       if (error) throw error;
-      
+
       // Fetch question titles for answers
-      const answersWithQuestions = await Promise.all(
-        (data || []).map(async (answer) => {
-          const { data: questionData } = await supabase
-            .from("questions")
-            .select("id, title")
-            .eq("id", answer.question_id)
-            .single();
-          
-          return {
-            ...answer,
-            question: questionData
-          };
-        })
-      );
-      
+      const answersWithQuestions = await Promise.all((data || []).map(async answer => {
+        const {
+          data: questionData
+        } = await supabase.from("questions").select("id, title").eq("id", answer.question_id).single();
+        return {
+          ...answer,
+          question: questionData
+        };
+      }));
       setUserAnswers(answersWithQuestions);
     } catch (error) {
       console.error("Error fetching user answers:", error);
     }
   };
-
   const fetchLikedQuestions = async () => {
     if (!user) return;
-
     try {
       // Get questions user has liked
-      const { data: votedQuestionIds, error: votesError } = await supabase
-        .from("votes")
-        .select("question_id")
-        .eq("user_id", user.id)
-        .eq("vote_type", 1)
-        .not("question_id", "is", null);
-
+      const {
+        data: votedQuestionIds,
+        error: votesError
+      } = await supabase.from("votes").select("question_id").eq("user_id", user.id).eq("vote_type", 1).not("question_id", "is", null);
       if (votesError) throw votesError;
-
       if (!votedQuestionIds || votedQuestionIds.length === 0) {
         setLikedQuestions([]);
         return;
       }
 
       // Get questions details
-      const { data: questions, error: questionsError } = await supabase
-        .from("questions")
-        .select("*")
-        .in("id", votedQuestionIds.map(v => v.question_id))
-        .order("created_at", { ascending: false });
-
+      const {
+        data: questions,
+        error: questionsError
+      } = await supabase.from("questions").select("*").in("id", votedQuestionIds.map(v => v.question_id)).order("created_at", {
+        ascending: false
+      });
       if (questionsError) throw questionsError;
 
       // Get answers count and likes count for each question
-      const questionsWithCounts = await Promise.all(
-        (questions || []).map(async (question) => {
-          const { count: answersCount } = await supabase
-            .from("answers")
-            .select("*", { count: "exact", head: true })
-            .eq("question_id", question.id);
-
-          const { count: likesCount } = await supabase
-            .from("votes")
-            .select("*", { count: "exact", head: true })
-            .eq("question_id", question.id)
-            .eq("vote_type", 1);
-
-          return {
-            ...question,
-            answers_count: answersCount || 0,
-            likes_count: likesCount || 0,
-          };
-        })
-      );
-
+      const questionsWithCounts = await Promise.all((questions || []).map(async question => {
+        const {
+          count: answersCount
+        } = await supabase.from("answers").select("*", {
+          count: "exact",
+          head: true
+        }).eq("question_id", question.id);
+        const {
+          count: likesCount
+        } = await supabase.from("votes").select("*", {
+          count: "exact",
+          head: true
+        }).eq("question_id", question.id).eq("vote_type", 1);
+        return {
+          ...question,
+          answers_count: answersCount || 0,
+          likes_count: likesCount || 0
+        };
+      }));
       setLikedQuestions(questionsWithCounts);
     } catch (error) {
       console.error("Error fetching liked questions:", error);
     }
   };
-
   const fetchBestAnswers = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from("answers")
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from("answers").select(`
           id,
           content,
           created_at,
           is_best_answer,
           question_id
-        `)
-        .eq("user_id", user.id)
-        .eq("is_best_answer", true)
-        .order("created_at", { ascending: false });
-
+        `).eq("user_id", user.id).eq("is_best_answer", true).order("created_at", {
+        ascending: false
+      });
       if (error) throw error;
-      
+
       // Fetch question titles for best answers
-      const bestAnswersWithQuestions = await Promise.all(
-        (data || []).map(async (answer) => {
-          const { data: questionData } = await supabase
-            .from("questions")
-            .select("id, title")
-            .eq("id", answer.question_id)
-            .single();
-          
-          return {
-            ...answer,
-            question: questionData
-          };
-        })
-      );
-      
+      const bestAnswersWithQuestions = await Promise.all((data || []).map(async answer => {
+        const {
+          data: questionData
+        } = await supabase.from("questions").select("id, title").eq("id", answer.question_id).single();
+        return {
+          ...answer,
+          question: questionData
+        };
+      }));
       setBestAnswers(bestAnswersWithQuestions);
     } catch (error) {
       console.error("Error fetching best answers:", error);
     }
   };
-
   const handleSaveProfile = async () => {
     if (!user || !profile) return;
-
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: editForm.display_name,
-          username: editForm.username,
-          bio: editForm.bio,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
+      const {
+        error
+      } = await supabase.from("profiles").update({
+        display_name: editForm.display_name,
+        username: editForm.username,
+        bio: editForm.bio,
+        updated_at: new Date().toISOString()
+      }).eq("id", user.id);
       if (error) throw error;
-
       setProfile({
         ...profile,
         display_name: editForm.display_name,
         username: editForm.username,
-        bio: editForm.bio,
+        bio: editForm.bio
       });
-
       setIsEditing(false);
       toast({
         title: "Профиль обновлён!",
-        description: "Ваши изменения сохранены.",
+        description: "Ваши изменения сохранены."
       });
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось обновить профиль.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || !event.target.files[0] || !user) return;
-
     const file = event.target.files[0];
-    
+
     // Check file size (200kb for avatars)
     if (file.size > 200 * 1024) {
       toast({
         title: "Файл слишком большой",
         description: "Размер аватара не должен превышать 200 кб",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/avatar.${fileExt}`;
-
     setUploading(true);
-
     try {
       // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('avatars').upload(fileName, file, {
+        upsert: true
+      });
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      const {
+        data: {
+          publicUrl
+        }
+      } = supabase.storage.from('avatars').getPublicUrl(fileName);
 
       // Update profile with new avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
-
+      const {
+        error: updateError
+      } = await supabase.from('profiles').update({
+        avatar_url: publicUrl
+      }).eq('id', user.id);
       if (updateError) throw updateError;
-
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-
+      setProfile(prev => prev ? {
+        ...prev,
+        avatar_url: publicUrl
+      } : null);
       toast({
         title: "Аватар обновлён!",
-        description: "Ваша фотография успешно загружена.",
+        description: "Ваша фотография успешно загружена."
       });
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast({
         title: "Ошибка загрузки",
         description: "Не удалось загрузить аватар.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setUploading(false);
     }
   };
-
   const handleAvatarDelete = async () => {
     if (!user || !profile?.avatar_url) return;
-
     setUploading(true);
-
     try {
       // Extract file path from URL
       const url = new URL(profile.avatar_url);
       const filePath = url.pathname.split('/').slice(-2).join('/'); // Extract "user_id/avatar.ext"
 
       // Delete file from storage
-      const { error: deleteError } = await supabase.storage
-        .from('avatars')
-        .remove([filePath]);
-
+      const {
+        error: deleteError
+      } = await supabase.storage.from('avatars').remove([filePath]);
       if (deleteError) throw deleteError;
 
       // Update profile to remove avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: null })
-        .eq('id', user.id);
-
+      const {
+        error: updateError
+      } = await supabase.from('profiles').update({
+        avatar_url: null
+      }).eq('id', user.id);
       if (updateError) throw updateError;
-
-      setProfile(prev => prev ? { ...prev, avatar_url: null } : null);
-
+      setProfile(prev => prev ? {
+        ...prev,
+        avatar_url: null
+      } : null);
       toast({
         title: "Аватар удалён",
-        description: "Ваша фотография успешно удалена.",
+        description: "Ваша фотография успешно удалена."
       });
     } catch (error) {
       console.error('Error deleting avatar:', error);
       toast({
         title: "Ошибка удаления",
         description: "Не удалось удалить аватар.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setUploading(false);
     }
   };
-
   const getReputationColor = (user: Profile) => {
     // Admins get red color
     if (user.role === 'admin') {
       return 'text-destructive';
     }
-    
+
     // Experts get purple color
     if (user.is_expert) {
       return 'text-expert';
     }
-    
+
     // Regular users get colors based on their rank
     switch (user.reputation_level) {
       case 'academician':
@@ -478,30 +431,35 @@ const Profile = () => {
         return 'text-muted-foreground';
     }
   };
-
   const getReputationLabel = (user: Profile) => {
     // Admins show admin role
     if (user.role === 'admin') {
       return 'Администратор';
     }
-    
+
     // Experts show expert role
     if (user.is_expert) {
       return 'Эксперт';
     }
-    
+
     // Regular users show their points-based rank
     switch (user.reputation_level) {
-      case 'academician': return 'Академик';
-      case 'dsc': return 'DSc';
-      case 'phd': return 'PhD';
-      case 'master': return 'Магистр';
-      case 'student': return 'Студент';
-      case 'learner': return 'Ученик';
-      default: return 'Новичок';
+      case 'academician':
+        return 'Академик';
+      case 'dsc':
+        return 'DSc';
+      case 'phd':
+        return 'PhD';
+      case 'master':
+        return 'Магистр';
+      case 'student':
+        return 'Студент';
+      case 'learner':
+        return 'Ученик';
+      default:
+        return 'Новичок';
     }
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       year: 'numeric',
@@ -515,37 +473,29 @@ const Profile = () => {
     data: userQuestions,
     itemsPerPage: 10
   });
-
   const answersPagination = usePagination({
     data: userAnswers,
     itemsPerPage: 10
   });
-
   const bestAnswersPagination = usePagination({
     data: bestAnswers,
     itemsPerPage: 10
   });
-
   const likedQuestionsPagination = usePagination({
     data: likedQuestions,
     itemsPerPage: 10
   });
-
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle">
+    return <div className="min-h-screen bg-gradient-subtle">
         <Header />
         <div className="container mx-auto px-4 py-6 text-center">
           <h1 className="text-2xl font-bold mb-4">Вход требуется</h1>
           <p className="text-muted-foreground">Войдите в аккаунт для просмотра профиля</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (loading || !profile) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle">
+    return <div className="min-h-screen bg-gradient-subtle">
         <Header />
         <div className="container mx-auto px-4 py-6">
           <div className="animate-pulse space-y-6">
@@ -553,12 +503,9 @@ const Profile = () => {
             <div className="h-64 bg-muted rounded-lg"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-subtle">
+  return <div className="min-h-screen bg-gradient-subtle">
       <Header />
       <div className="container mx-auto px-4 py-6">
         {/* Profile Header */}
@@ -568,10 +515,7 @@ const Profile = () => {
               {/* Avatar Section */}
               <div className="relative group">
                 <Avatar className="w-24 h-24 ring-4 ring-primary/20">
-                  <AvatarImage 
-                    src={profile.avatar_url || undefined} 
-                    alt={profile.display_name || profile.username || "Avatar"}
-                  />
+                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username || "Avatar"} />
                   <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
                     {(profile.display_name || profile.username || "U").charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -580,34 +524,15 @@ const Profile = () => {
                 {/* Avatar Controls */}
                 <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="flex gap-2">
-                    <label 
-                      htmlFor="avatar-upload"
-                      className="bg-primary hover:bg-primary/80 text-white p-2 rounded-full cursor-pointer transition-colors"
-                    >
+                    <label htmlFor="avatar-upload" className="bg-primary hover:bg-primary/80 text-white p-2 rounded-full cursor-pointer transition-colors">
                       <Camera className="w-4 h-4" />
                     </label>
-                    {profile.avatar_url && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        className="p-2 h-auto"
-                        onClick={handleAvatarDelete}
-                        disabled={uploading}
-                      >
+                    {profile.avatar_url && <Button type="button" size="sm" variant="destructive" className="p-2 h-auto" onClick={handleAvatarDelete} disabled={uploading}>
                         <X className="w-4 h-4" />
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
                 </div>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
+                <input id="avatar-upload" type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploading} />
               </div>
 
               {/* Profile Info */}
@@ -618,10 +543,7 @@ const Profile = () => {
                       {profile.display_name || profile.username}
                     </h1>
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`${getReputationColor(profile)} border-current`}
-                      >
+                      <Badge variant="outline" className={`${getReputationColor(profile)} border-current`}>
                         <Crown className="w-3 h-3 mr-1" />
                         {getReputationLabel(profile)}
                       </Badge>
@@ -629,16 +551,10 @@ const Profile = () => {
                         {profile.points} баллов
                       </Badge>
                     </div>
-                    {profile.bio && (
-                      <p className="text-muted-foreground">{profile.bio}</p>
-                    )}
+                    {profile.bio && <p className="text-muted-foreground">{profile.bio}</p>}
                   </div>
                   
-                  <Button
-                    variant={isEditing ? "ghost" : "outline"}
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="self-start"
-                  >
+                  <Button variant={isEditing ? "ghost" : "outline"} onClick={() => setIsEditing(!isEditing)} className="self-start">
                     {isEditing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                     {isEditing ? "Отмена" : "Редактировать"}
                   </Button>
@@ -656,53 +572,37 @@ const Profile = () => {
                     <div className="text-lg font-bold text-success">{stats.answersCount}</div>
                     <div className="text-xs text-muted-foreground">Ответов</div>
                   </div>
-                  <div className="text-center p-3 bg-gradient-to-br from-accent-warm/10 to-accent-warm/5 rounded-lg">
-                    <Heart className="w-5 h-5 text-accent-warm mx-auto mb-1" />
-                    <div className="text-lg font-bold text-accent-warm">{stats.totalLikes}</div>
-                    <div className="text-xs text-muted-foreground">Лайков</div>
-                  </div>
-                  <div className="text-center p-3 bg-gradient-to-br from-expert/10 to-expert/5 rounded-lg">
-                    <Trophy className="w-5 h-5 text-expert mx-auto mb-1" />
-                    <div className="text-lg font-bold text-expert">{stats.bestAnswers}</div>
-                    <div className="text-xs text-muted-foreground">Лучших</div>
-                  </div>
+                  
+                  
                 </div>
               </div>
             </div>
 
             {/* Edit Form */}
-            {isEditing && (
-              <div className="mt-6 pt-6 border-t border-border/50 animate-fade-in">
+            {isEditing && <div className="mt-6 pt-6 border-t border-border/50 animate-fade-in">
                 <div className="grid gap-4 max-w-2xl">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="display-name">Отображаемое имя</Label>
-                      <Input
-                        id="display-name"
-                        placeholder="Ваше имя"
-                        value={editForm.display_name}
-                        onChange={(e) => setEditForm({...editForm, display_name: e.target.value})}
-                      />
+                      <Input id="display-name" placeholder="Ваше имя" value={editForm.display_name} onChange={e => setEditForm({
+                    ...editForm,
+                    display_name: e.target.value
+                  })} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="username">Имя пользователя</Label>
-                      <Input
-                        id="username"
-                        placeholder="username"
-                        value={editForm.username}
-                        onChange={(e) => setEditForm({...editForm, username: e.target.value})}
-                      />
+                      <Input id="username" placeholder="username" value={editForm.username} onChange={e => setEditForm({
+                    ...editForm,
+                    username: e.target.value
+                  })} />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="bio">О себе</Label>
-                    <Textarea
-                      id="bio"
-                      placeholder="Расскажите о себе..."
-                      value={editForm.bio}
-                      onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
-                      rows={3}
-                    />
+                    <Textarea id="bio" placeholder="Расскажите о себе..." value={editForm.bio} onChange={e => setEditForm({
+                  ...editForm,
+                  bio: e.target.value
+                })} rows={3} />
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={handleSaveProfile}>
@@ -711,8 +611,7 @@ const Profile = () => {
                     </Button>
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
 
@@ -738,22 +637,16 @@ const Profile = () => {
           </TabsList>
 
           <TabsContent value="questions" className="space-y-4 mt-6">
-            {userQuestions.length === 0 ? (
-              <Card className="shadow-card">
+            {userQuestions.length === 0 ? <Card className="shadow-card">
                 <CardContent className="text-center py-12">
                   <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Нет вопросов</h3>
                   <p className="text-muted-foreground">Вы ещё не задавали вопросов</p>
                 </CardContent>
-              </Card>
-            ) : (
-              <>
-                {questionsPagination.paginatedData.map((question, index) => (
-                <Card 
-                  key={question.id} 
-                  className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+              </Card> : <>
+                {questionsPagination.paginatedData.map((question, index) => <Card key={question.id} className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer" style={{
+              animationDelay: `${index * 0.1}s`
+            }}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -778,49 +671,31 @@ const Profile = () => {
                       </span>
                     </div>
                   </CardContent>
-                </Card>
-                ))}
+                </Card>)}
                 
-                <PaginationControls
-                  currentPage={questionsPagination.currentPage}
-                  totalPages={questionsPagination.totalPages}
-                  onPageChange={questionsPagination.goToPage}
-                  hasNextPage={questionsPagination.hasNextPage}
-                  hasPrevPage={questionsPagination.hasPrevPage}
-                />
-              </>
-            )}
+                <PaginationControls currentPage={questionsPagination.currentPage} totalPages={questionsPagination.totalPages} onPageChange={questionsPagination.goToPage} hasNextPage={questionsPagination.hasNextPage} hasPrevPage={questionsPagination.hasPrevPage} />
+              </>}
           </TabsContent>
 
           <TabsContent value="answers" className="space-y-4 mt-6">
-            {userAnswers.length === 0 ? (
-              <Card className="shadow-card">
+            {userAnswers.length === 0 ? <Card className="shadow-card">
                 <CardContent className="text-center py-12">
                   <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Нет ответов</h3>
                   <p className="text-muted-foreground">Вы ещё не отвечали на вопросы</p>
                 </CardContent>
-              </Card>
-            ) : (
-              <>
-                {answersPagination.paginatedData.map((answer, index) => (
-                <Card 
-                  key={answer.id} 
-                  className={`shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ${
-                    answer.is_best_answer ? 'ring-2 ring-success/50 bg-success/5' : ''
-                  }`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+              </Card> : <>
+                {answersPagination.paginatedData.map((answer, index) => <Card key={answer.id} className={`shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ${answer.is_best_answer ? 'ring-2 ring-success/50 bg-success/5' : ''}`} style={{
+              animationDelay: `${index * 0.1}s`
+            }}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          {answer.is_best_answer && (
-                            <Badge className="bg-success text-success-foreground">
+                          {answer.is_best_answer && <Badge className="bg-success text-success-foreground">
                               <Star className="w-3 h-3 mr-1" />
                               Лучший ответ
-                            </Badge>
-                          )}
+                            </Badge>}
                         </div>
                         <h3 className="font-semibold hover:text-primary transition-colors">
                           {answer.question?.title || "Вопрос удалён"}
@@ -839,38 +714,23 @@ const Profile = () => {
                       </span>
                     </div>
                   </CardContent>
-                </Card>
-                ))}
+                </Card>)}
                 
-                <PaginationControls
-                  currentPage={answersPagination.currentPage}
-                  totalPages={answersPagination.totalPages}
-                  onPageChange={answersPagination.goToPage}
-                  hasNextPage={answersPagination.hasNextPage}
-                  hasPrevPage={answersPagination.hasPrevPage}
-                />
-              </>
-            )}
+                <PaginationControls currentPage={answersPagination.currentPage} totalPages={answersPagination.totalPages} onPageChange={answersPagination.goToPage} hasNextPage={answersPagination.hasNextPage} hasPrevPage={answersPagination.hasPrevPage} />
+              </>}
           </TabsContent>
 
           <TabsContent value="best-answers" className="space-y-4 mt-6">
-            {bestAnswers.length === 0 ? (
-              <Card className="shadow-card">
+            {bestAnswers.length === 0 ? <Card className="shadow-card">
                 <CardContent className="text-center py-12">
                   <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Нет лучших ответов</h3>
                   <p className="text-muted-foreground">Ваши ответы ещё не были отмечены как лучшие</p>
                 </CardContent>
-              </Card>
-            ) : (
-              <>
-                {bestAnswersPagination.paginatedData.map((answer, index) => (
-                <Card 
-                  key={answer.id} 
-                  className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ring-2 ring-success/50 bg-success/5"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => window.location.href = `/question/${answer.question?.id}`}
-                >
+              </Card> : <>
+                {bestAnswersPagination.paginatedData.map((answer, index) => <Card key={answer.id} className="shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in cursor-pointer ring-2 ring-success/50 bg-success/5" style={{
+              animationDelay: `${index * 0.1}s`
+            }} onClick={() => window.location.href = `/question/${answer.question?.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -897,18 +757,10 @@ const Profile = () => {
                       </span>
                     </div>
                   </CardContent>
-                </Card>
-                ))}
+                </Card>)}
                 
-                <PaginationControls
-                  currentPage={bestAnswersPagination.currentPage}
-                  totalPages={bestAnswersPagination.totalPages}
-                  onPageChange={bestAnswersPagination.goToPage}
-                  hasNextPage={bestAnswersPagination.hasNextPage}
-                  hasPrevPage={bestAnswersPagination.hasPrevPage}
-                />
-              </>
-            )}
+                <PaginationControls currentPage={bestAnswersPagination.currentPage} totalPages={bestAnswersPagination.totalPages} onPageChange={bestAnswersPagination.goToPage} hasNextPage={bestAnswersPagination.hasNextPage} hasPrevPage={bestAnswersPagination.hasPrevPage} />
+              </>}
           </TabsContent>
 
           {/* Liked Questions Tab */}
@@ -921,20 +773,12 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {likedQuestions.length === 0 ? (
-                  <div className="text-center py-8">
+                {likedQuestions.length === 0 ? <div className="text-center py-8">
                     <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">Вы ещё не лайкали ни одного вопроса</p>
                     <p className="text-sm text-muted-foreground mt-2">Ставьте лайки интересным вопросам!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {likedQuestionsPagination.paginatedData.map((question) => (
-                      <div 
-                        key={question.id}
-                        className="p-4 border border-border/50 rounded-lg hover:shadow-card transition-shadow cursor-pointer"
-                        onClick={() => window.location.href = `/question/${question.id}`}
-                      >
+                  </div> : <div className="space-y-4">
+                    {likedQuestionsPagination.paginatedData.map(question => <div key={question.id} className="p-4 border border-border/50 rounded-lg hover:shadow-card transition-shadow cursor-pointer" onClick={() => window.location.href = `/question/${question.id}`}>
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-2">
                             {question.title}
@@ -964,25 +808,15 @@ const Profile = () => {
                           </div>
                           <span>{formatDate(question.created_at)}</span>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                     
-                    <PaginationControls
-                      currentPage={likedQuestionsPagination.currentPage}
-                      totalPages={likedQuestionsPagination.totalPages}
-                      onPageChange={likedQuestionsPagination.goToPage}
-                      hasNextPage={likedQuestionsPagination.hasNextPage}
-                      hasPrevPage={likedQuestionsPagination.hasPrevPage}
-                    />
-                  </div>
-                )}
+                    <PaginationControls currentPage={likedQuestionsPagination.currentPage} totalPages={likedQuestionsPagination.totalPages} onPageChange={likedQuestionsPagination.goToPage} hasNextPage={likedQuestionsPagination.hasNextPage} hasPrevPage={likedQuestionsPagination.hasPrevPage} />
+                  </div>}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Profile;

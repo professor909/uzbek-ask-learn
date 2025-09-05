@@ -40,74 +40,113 @@ const HeroSection = () => {
     color: "text-success"
   }]);
   const [topUsers, setTopUsers] = useState<any[]>([]);
+  const fetchStats = async () => {
+    try {
+      // Fetch questions count
+      const {
+        count: questionsCount
+      } = await supabase.from('questions').select('*', {
+        count: 'exact',
+        head: true
+      });
+
+      // Fetch users count
+      const {
+        count: usersCount
+      } = await supabase.from('profiles').select('*', {
+        count: 'exact',
+        head: true
+      });
+
+      // Fetch experts count
+      const {
+        count: expertsCount
+      } = await supabase.from('profiles').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('is_expert', true);
+
+      // Fetch solved questions count
+      const {
+        count: solvedCount
+      } = await supabase.from('questions').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('is_solved', true);
+      setStats([{
+        icon: BookOpen,
+        labelKey: "hero.stats.activeQuestions",
+        value: questionsCount?.toString() || "0",
+        color: "text-primary"
+      }, {
+        icon: Users,
+        labelKey: "hero.stats.participants",
+        value: usersCount?.toString() || "0",
+        color: "text-accent-warm"
+      }, {
+        icon: Award,
+        labelKey: "hero.stats.experts",
+        value: expertsCount?.toString() || "0",
+        color: "text-expert"
+      }, {
+        icon: TrendingUp,
+        labelKey: "hero.stats.solvedTasks",
+        value: solvedCount?.toString() || "0",
+        color: "text-success"
+      }]);
+
+      // Fetch top users of the month
+      const {
+        data: topUsersData
+      } = await supabase.from('profiles').select('id, username, display_name, avatar_url, points, role').order('points', {
+        ascending: false
+      }).limit(5);
+      setTopUsers(topUsersData || []);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Fetch questions count
-        const {
-          count: questionsCount
-        } = await supabase.from('questions').select('*', {
-          count: 'exact',
-          head: true
-        });
-
-        // Fetch users count
-        const {
-          count: usersCount
-        } = await supabase.from('profiles').select('*', {
-          count: 'exact',
-          head: true
-        });
-
-        // Fetch experts count
-        const {
-          count: expertsCount
-        } = await supabase.from('profiles').select('*', {
-          count: 'exact',
-          head: true
-        }).eq('is_expert', true);
-
-        // Fetch solved questions count
-        const {
-          count: solvedCount
-        } = await supabase.from('questions').select('*', {
-          count: 'exact',
-          head: true
-        }).eq('is_solved', true);
-        setStats([{
-          icon: BookOpen,
-          labelKey: "hero.stats.activeQuestions",
-          value: questionsCount?.toString() || "0",
-          color: "text-primary"
-        }, {
-          icon: Users,
-          labelKey: "hero.stats.participants",
-          value: usersCount?.toString() || "0",
-          color: "text-accent-warm"
-        }, {
-          icon: Award,
-          labelKey: "hero.stats.experts",
-          value: expertsCount?.toString() || "0",
-          color: "text-expert"
-        }, {
-          icon: TrendingUp,
-          labelKey: "hero.stats.solvedTasks",
-          value: solvedCount?.toString() || "0",
-          color: "text-success"
-        }]);
-
-        // Fetch top users of the month
-        const {
-          data: topUsersData
-        } = await supabase.from('profiles').select('id, username, display_name, avatar_url, points, role').order('points', {
-          ascending: false
-        }).limit(5);
-        setTopUsers(topUsersData || []);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      }
-    };
     fetchStats();
+  }, []);
+
+  // Listen to realtime changes for questions and profiles to update stats
+  useEffect(() => {
+    const questionsChannel = supabase
+      .channel('questions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'questions'
+        },
+        () => {
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    const profilesChannel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(questionsChannel);
+      supabase.removeChannel(profilesChannel);
+    };
   }, []);
   return <div className="relative overflow-hidden bg-gradient-hero rounded-2xl p-8 lg:p-12 mb-8">
       {/* Background decoration */}

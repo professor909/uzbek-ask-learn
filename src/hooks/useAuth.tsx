@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userProfile: any | null;
+  isBlocked: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -15,6 +17,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      setUserProfile(profile);
+      setIsBlocked(profile?.role === 'blocked');
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUserProfile(null);
+      setIsBlocked(false);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -23,6 +44,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Fetch user profile if logged in
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        } else {
+          setUserProfile(null);
+          setIsBlocked(false);
+        }
       }
     );
 
@@ -31,6 +62,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      if (session?.user) {
+        setTimeout(() => {
+          fetchUserProfile(session.user.id);
+        }, 0);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -38,12 +75,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUserProfile(null);
+    setIsBlocked(false);
   };
 
   const value = {
     user,
     session,
     loading,
+    userProfile,
+    isBlocked,
     signOut,
   };
 

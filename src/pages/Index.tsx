@@ -6,10 +6,16 @@ import Sidebar from "@/components/Sidebar";
 import QuestionFeed from "@/components/QuestionFeed";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
+import BlockedUserMessage from "@/components/BlockedUserMessage";
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isBlocked } = useAuth();
   const navigate = useNavigate();
+
+  // Показываем блокировку для заблокированных пользователей
+  if (!loading && user && isBlocked) {
+    return <BlockedUserMessage />;
+  }
 
   // Убираем принудительную авторизацию - контент доступен всем
   if (loading) {

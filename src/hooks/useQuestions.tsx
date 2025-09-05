@@ -152,6 +152,26 @@ export const useQuestions = () => {
       return;
     }
 
+    // Check if user is blocked
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.role === 'blocked') {
+        toast({
+          title: 'Доступ запрещён',
+          description: 'Ваш аккаунт заблокирован. Обратитесь к администрации.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking user status:', error);
+    }
+
     // Check if user has enough points
     let profile: any = null;
     try {
@@ -269,6 +289,37 @@ export const useQuestions = () => {
 
   useEffect(() => {
     fetchQuestions();
+    
+    // Listen to realtime changes
+    const questionsChannel = supabase
+      .channel('questions-feed-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'questions'
+        },
+        () => {
+          fetchQuestions();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'answers'
+        },
+        () => {
+          fetchQuestions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(questionsChannel);
+    };
   }, []); // Убираем зависимость от user - загружаем вопросы для всех
 
   return {

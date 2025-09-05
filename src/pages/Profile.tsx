@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from "@/components/Header";
+import BlockedUserMessage from "@/components/BlockedUserMessage";
 import { User, Edit, Save, X, Camera, Star, MessageCircle, Trophy, Heart, Award, BookOpen, Calendar, Crown } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/PaginationControls";
@@ -55,11 +56,18 @@ interface Answer {
 }
 const Profile = () => {
   const {
-    user
+    user,
+    isBlocked
   } = useAuth();
   const {
     toast
   } = useToast();
+
+  // Show blocked message if user is blocked
+  if (user && isBlocked) {
+    return <BlockedUserMessage />;
+  }
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<UserStats>({
     questionsCount: 0,

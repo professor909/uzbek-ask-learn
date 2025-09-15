@@ -136,11 +136,11 @@ const QuestionCard = ({
             {canManage && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="min-w-[200px]" sideOffset={5}>
                   <DropdownMenuItem onClick={handleDelete} className="text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Удалить вопрос

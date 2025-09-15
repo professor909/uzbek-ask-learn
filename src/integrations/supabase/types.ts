@@ -167,6 +167,36 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_points: {
+        Row: {
+          created_at: string
+          id: string
+          month: number
+          points: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: number
+          points?: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: number
+          points?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           content: string
@@ -378,6 +408,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_monthly_points: {
+        Args: { points_to_add: number; user_id: string }
+        Returns: undefined
+      }
       calculate_rank_by_points: {
         Args: { points_value: number }
         Returns: string

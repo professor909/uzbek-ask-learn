@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { TrendingUp, Users, Hash, Star, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ interface TopUser {
   points: number;
   answers: number;
   rank: string;
+  avatarUrl?: string;
 }
 
 const getCategoriesData = (t: (key: string) => string): CategoryData[] => [
@@ -92,25 +93,45 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
 
     const fetchTopUsers = async () => {
       try {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, display_name, username, points, role')
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+
+        // Get top 5 users by monthly points
+        const { data: monthlyData } = await supabase
+          .from('monthly_points')
+          .select(`
+            user_id,
+            points,
+            profiles!inner (
+              id,
+              display_name,
+              username,
+              role,
+              avatar_url
+            )
+          `)
+          .eq('year', currentYear)
+          .eq('month', currentMonth)
           .order('points', { ascending: false })
           .limit(5);
 
-        if (profiles) {
+        if (monthlyData) {
           const usersWithAnswers = await Promise.all(
-            profiles.map(async (profile) => {
+            monthlyData.map(async (record: any) => {
+              const profile = record.profiles;
               const { count: answersCount } = await supabase
                 .from('answers')
                 .select('*', { count: 'exact', head: true })
-                .eq('user_id', profile.id);
+                .eq('user_id', profile.id)
+                .gte('created_at', `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`)
+                .lt('created_at', `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-01`);
 
               return {
                 name: profile.display_name || profile.username || 'Пользователь',
-                points: profile.points || 0,
+                points: record.points || 0,
                 answers: answersCount || 0,
-                rank: profile.role || 'novice'
+                rank: profile.role || 'novice',
+                avatarUrl: profile.avatar_url
               };
             })
           );
@@ -217,12 +238,13 @@ const QuestionSidebar = ({ questionsCount, onCategoryClick }: QuestionSidebarPro
             topUsers.map((user, index) => (
             <div key={user.name} className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 min-w-0 flex-1">
-                <div className="relative">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                      {user.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
+                 <div className="relative">
+                   <Avatar className="w-8 h-8">
+                     {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.name} />}
+                     <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                       {user.name.split(' ').map(n => n[0]).join('')}
+                     </AvatarFallback>
+                   </Avatar>
                   {index < 3 && (
                     <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs flex items-center justify-center text-white font-bold ${
                       index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-600'

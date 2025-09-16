@@ -196,13 +196,21 @@ export const useQuestions = () => {
     }
 
     try {
-      // First deduct points from user
+      // First deduct points from user (both total and monthly)
       const { error: pointsError } = await supabase
         .from('profiles')
         .update({ points: profile ? profile.points - questionData.points : 0 })
         .eq('id', user.id);
 
       if (pointsError) throw pointsError;
+
+      // Deduct monthly points
+      const { error: monthlyPointsError } = await supabase.rpc('deduct_monthly_points', {
+        user_id: user.id,
+        points_to_deduct: questionData.points
+      });
+
+      if (monthlyPointsError) throw monthlyPointsError;
 
       const { error } = await supabase.from('questions').insert({
         ...questionData,
@@ -216,6 +224,13 @@ export const useQuestions = () => {
           .from('profiles')
           .update({ points: profile ? profile.points : 0 })
           .eq('id', user.id);
+        
+        // Rollback monthly points
+        await supabase.rpc('add_monthly_points', {
+          user_id: user.id,
+          points_to_add: questionData.points
+        });
+        
         throw error;
       }
 

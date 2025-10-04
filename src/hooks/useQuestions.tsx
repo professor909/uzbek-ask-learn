@@ -337,6 +337,27 @@ export const useQuestions = () => {
     };
   }, []); // Убираем зависимость от user - загружаем вопросы для всех
 
+  // Refetch questions when user returns to the page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchQuestions();
+      }
+    };
+
+    const handleFocus = () => {
+      fetchQuestions();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
   return {
     questions,
     loading,

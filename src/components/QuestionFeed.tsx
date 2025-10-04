@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import QuestionCard from "./QuestionCard";
 import CreateQuestionDialog from "./CreateQuestionDialog";
 import SearchAndFilter from "./SearchAndFilter";
@@ -63,15 +64,38 @@ const QuestionFeed = () => {
     return filtered;
   }, [questions, searchQuery, selectedCategory, sortBy, language]);
 
+  // Separate active and solved questions
+  const activeQuestions = useMemo(() => 
+    filteredQuestions.filter(q => !q.is_solved), 
+    [filteredQuestions]
+  );
+  
+  const solvedQuestions = useMemo(() => 
+    filteredQuestions.filter(q => q.is_solved), 
+    [filteredQuestions]
+  );
+
   const {
-    currentPage,
-    totalPages,
-    paginatedData,
-    goToPage,
-    hasNextPage,
-    hasPrevPage
+    currentPage: activePage,
+    totalPages: activeTotalPages,
+    paginatedData: paginatedActive,
+    goToPage: goToActivePage,
+    hasNextPage: activeHasNext,
+    hasPrevPage: activeHasPrev
   } = usePagination({
-    data: filteredQuestions,
+    data: activeQuestions,
+    itemsPerPage: 10
+  });
+
+  const {
+    currentPage: solvedPage,
+    totalPages: solvedTotalPages,
+    paginatedData: paginatedSolved,
+    goToPage: goToSolvedPage,
+    hasNextPage: solvedHasNext,
+    hasPrevPage: solvedHasPrev
+  } = usePagination({
+    data: solvedQuestions,
     itemsPerPage: 10
   });
 
@@ -138,42 +162,114 @@ const QuestionFeed = () => {
               </CardContent>
             </Card>
           ) : (
-            <div id="questions-section" className="space-y-6">
-              {paginatedData.map((question) => (
-                <QuestionCard 
-                  key={question.id} 
-                  id={question.id}
-                  title={question.title}
-                  content={question.content}
-                  category={question.category}
-                  points={question.points}
-                  answersCount={question.answers_count || 0}
-                  likesCount={question.likes_count || 0}
-                  isExpert={question.is_expert}
-                  authorName={question.profiles?.display_name || question.profiles?.username || 'Неизвестный'}
-                  authorRank={
-                    question.profiles?.role === 'admin' ? 'admin' :
-                    question.profiles?.is_expert ? 'expert' :
-                    question.profiles?.reputation_level || 'novice'
-                  }
-                  timeAgo={formatTimeAgo(question.created_at)}
-                  isBestAnswer={question.is_solved}
-                  userVote={question.user_vote}
-                  authorId={question.user_id}
-                  imageUrl={question.image_url}
-                  authorAvatarUrl={question.profiles?.avatar_url}
-                  onVote={voteOnQuestion}
-                  onDeleted={refetch}
-                />
-              ))}
-              
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={goToPage}
-                hasNextPage={hasNextPage}
-                hasPrevPage={hasPrevPage}
-              />
+            <div id="questions-section" className="space-y-8">
+              {/* Active Questions Section */}
+              {activeQuestions.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Активные вопросы
+                    </h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {activeQuestions.length}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {paginatedActive.map((question) => (
+                      <QuestionCard 
+                        key={question.id} 
+                        id={question.id}
+                        title={question.title}
+                        content={question.content}
+                        category={question.category}
+                        points={question.points}
+                        answersCount={question.answers_count || 0}
+                        likesCount={question.likes_count || 0}
+                        isExpert={question.is_expert}
+                        authorName={question.profiles?.display_name || question.profiles?.username || 'Неизвестный'}
+                        authorRank={
+                          question.profiles?.role === 'admin' ? 'admin' :
+                          question.profiles?.is_expert ? 'expert' :
+                          question.profiles?.reputation_level || 'novice'
+                        }
+                        timeAgo={formatTimeAgo(question.created_at)}
+                        isBestAnswer={question.is_solved}
+                        userVote={question.user_vote}
+                        authorId={question.user_id}
+                        imageUrl={question.image_url}
+                        authorAvatarUrl={question.profiles?.avatar_url}
+                        onVote={voteOnQuestion}
+                        onDeleted={refetch}
+                      />
+                    ))}
+                    
+                    {activeTotalPages > 1 && (
+                      <PaginationControls
+                        currentPage={activePage}
+                        totalPages={activeTotalPages}
+                        onPageChange={goToActivePage}
+                        hasNextPage={activeHasNext}
+                        hasPrevPage={activeHasPrev}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Solved Questions Section */}
+              {solvedQuestions.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <h2 className="text-xl font-semibold text-muted-foreground">
+                      Решенные вопросы
+                    </h2>
+                    <Badge variant="outline" className="text-xs">
+                      {solvedQuestions.length}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-6 opacity-75">
+                    {paginatedSolved.map((question) => (
+                      <QuestionCard 
+                        key={question.id} 
+                        id={question.id}
+                        title={question.title}
+                        content={question.content}
+                        category={question.category}
+                        points={question.points}
+                        answersCount={question.answers_count || 0}
+                        likesCount={question.likes_count || 0}
+                        isExpert={question.is_expert}
+                        authorName={question.profiles?.display_name || question.profiles?.username || 'Неизвестный'}
+                        authorRank={
+                          question.profiles?.role === 'admin' ? 'admin' :
+                          question.profiles?.is_expert ? 'expert' :
+                          question.profiles?.reputation_level || 'novice'
+                        }
+                        timeAgo={formatTimeAgo(question.created_at)}
+                        isBestAnswer={question.is_solved}
+                        userVote={question.user_vote}
+                        authorId={question.user_id}
+                        imageUrl={question.image_url}
+                        authorAvatarUrl={question.profiles?.avatar_url}
+                        onVote={voteOnQuestion}
+                        onDeleted={refetch}
+                      />
+                    ))}
+                    
+                    {solvedTotalPages > 1 && (
+                      <PaginationControls
+                        currentPage={solvedPage}
+                        totalPages={solvedTotalPages}
+                        onPageChange={goToSolvedPage}
+                        hasNextPage={solvedHasNext}
+                        hasPrevPage={solvedHasPrev}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

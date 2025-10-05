@@ -432,6 +432,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_user_blocked: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       refresh_experts_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
